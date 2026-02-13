@@ -1,15 +1,15 @@
 launch:
   - arg:
       name: filter_config
-      default: "$(find-pkg-share rovio)/cfg/rovio.info"
+      default: "$(find-pkg-share rovtio)/cfg/rovtio/rovtio.info"
 
   - arg:
       name: cam0_config
-      default: "$(find-pkg-share rovio)/cfg/euroc_cam0.yaml"
+      default: "$(find-pkg-share rovtio)/cfg/rovtio/euroc_cam0.yaml"
 
   - arg:
       name: cam1_config
-      default: "$(find-pkg-share rovio)/cfg/euroc_cam1.yaml"
+      default: "$(find-pkg-share rovtio)/cfg/rovtio/euroc_cam1.yaml"
   - arg:
       name: imu_topic
       default: "/imu0"
@@ -32,9 +32,9 @@ launch:
       name: vis_fps
       default: "5"
   - node:
-      pkg: rovio
-      exec: rovio_node
-      name: rovio
+      pkg: rovtio
+      exec: rovtio_node
+      name: rovtio
       output: screen
       param:
         - name: filter_config
@@ -56,8 +56,8 @@ launch:
   - node:
       pkg: image_view
       exec: image_view
-      name: rovio_image_view
+      name: rovtio_image_view
       remap:
         - from: image
-          to: /rovio/imgVis0
+          to: /rovtio/imgVis0
 

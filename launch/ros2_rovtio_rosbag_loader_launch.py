@@ -7,15 +7,15 @@ from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    package_share = FindPackageShare('rovio').find('rovio')
-    config_file = os.path.join(package_share, 'cfg', 'rovio.info')
+    package_share = FindPackageShare('rovtio').find('rovtio')
+    config_file = os.path.join(package_share, 'cfg/rovtio', 'rovtio.info')
     filter_config_arg = DeclareLaunchArgument('filter_config',
                                               default_value=config_file)
-    cam0_config = os.path.join(package_share,'cfg', 'euroc_cam0.yaml')
+    cam0_config = os.path.join(package_share,'cfg/rovtio', 'euroc_cam0.yaml')
     cam0_config_arg = DeclareLaunchArgument('cam0_config',default_value=cam0_config)
-    cam1_config = os.path.join(package_share,'cfg', 'euroc_cam1.yaml')
+    cam1_config = os.path.join(package_share,'cfg/rovtio', 'euroc_cam1.yaml')
     cam1_config_arg = DeclareLaunchArgument('cam1_config',default_value=cam1_config)
-    bag_file_path = "/home/suby/Desktop/Robotics_projects/open_source/rovio_ws/datasets/machine_hall/MH_01_easy/MH_01_easy_ros2/MH_01_easy_ros2.db3"
+    bag_file_path = "~/datasets/V2_01_easy/V2_01_easy.db3"
     bag_file_arg = DeclareLaunchArgument('rosbag_filename', default_value=bag_file_path)
     imu_topic_arg = DeclareLaunchArgument('imu_topic_name', default_value='/imu0')
     cam0_topic_arg = DeclareLaunchArgument('cam0_topic_name', default_value='/cam0/image_raw')
@@ -29,10 +29,10 @@ def generate_launch_description():
     print("cam0 config: ", cam0_config)
     print("filter config: ", config_file)
     print("basg file path: ", bag_file_path)
-    rovio_node = Node(
-        package='rovio',
-        executable='rovio_rosbag_loader',
-        name='rovio',
+    rovtio_node = Node(
+        package='rovtio',
+        executable='rovtio_rosbag_loader',
+        name='rovtio',
         output='screen',
         parameters=[
             {
@@ -62,5 +62,5 @@ def generate_launch_description():
         resize_image_arg,
         resize_image_width_arg,
         resize_image_height_arg,
-        rovio_node
+        rovtio_node
     ])

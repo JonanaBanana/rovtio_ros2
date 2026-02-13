@@ -1,19 +1,19 @@
 launch:
   - arg:
       name: filter_config
-      default: "$(find-pkg-share rovio)/cfg/rovio.info"
+      default: "$(find-pkg-share rovtio)/cfg/rovtio/rovtio.info"
 
   - arg:
       name: cam0_config
-      default: "$(find-pkg-share rovio)/cfg/euroc_cam0.yaml"
+      default: "$(find-pkg-share rovtio)/cfg/rovtio/euroc_cam0.yaml"
 
   - arg:
       name: cam1_config
-      default: "$(find-pkg-share rovio)/cfg/euroc_cam1.yaml"
+      default: "$(find-pkg-share rovtio)/cfg/rovtio/euroc_cam1.yaml"
 
   - arg:
       name: rosbag_filename
-      default: "/home/suby/Desktop/Robotics_projects/open_source/rovio_ws/datasets/machine_hall/MH_01_easy/MH_01_easy_ros2/MH_01_easy_ros2.db3"
+      default: "~/datasets/V2_01_easy/V2_01_easy.db3"
 
   - arg:
       name: imu_topic_name
@@ -45,9 +45,9 @@ launch:
       name: vis_fps
       default: "5"
   - node:
-      pkg: rovio
-      exec: rovio_rosbag_loader
-      name: rovio
+      pkg: rovtio
+      exec: rovtio_rosbag_loader
+      name: rovtio
       output: screen
       param:
         - name: filter_config
@@ -77,8 +77,8 @@ launch:
   - node:
       pkg: image_view
       exec: image_view
-      name: rovio_image_view
+      name: rovtio_image_view
       output: screen
       remap:
         - from: image
-          to: /rovio/imgVis0
+          to: /rovtio/imgVis0
