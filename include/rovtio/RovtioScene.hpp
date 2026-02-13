@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_ROVIOSCENE_HPP_
-#define ROVIO_ROVIOSCENE_HPP_
+#ifndef ROVTIO_ROVTIOSCENE_HPP_
+#define ROVTIO_ROVTIOSCENE_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "rovtio/Scene.hpp"
@@ -36,23 +36,23 @@
 namespace rovtio {
 
 template<typename FILTER>
-class RovioScene{
+class RovtioScene{
  public:
   typedef typename FILTER::mtFilterState mtFilterState;
   typedef typename mtFilterState::mtState mtState;
   std::shared_ptr<FILTER> mpFilter_;
 
-  rovio::Scene mScene;
+  rovtio::Scene mScene;
   cv::Mat patch_;
   std::shared_ptr<SceneObject> mpSensor_[mtState::nCam_];
   std::shared_ptr<SceneObject> mpGroundtruth_;
   std::shared_ptr<SceneObject> mpLines_[mtState::nCam_];
   std::shared_ptr<SceneObject> mpDepthVar_[mtState::nCam_];
   std::shared_ptr<SceneObject> mpPatches_[mtState::nMax_];
-  RovioScene(){
+  RovtioScene(){
     patch_ = cv::Mat::zeros(mtState::patchSize_*pow(2,mtState::nLevels_-1),mtState::patchSize_*pow(2,mtState::nLevels_-1),CV_8UC1);
   }
-  virtual ~RovioScene(){};
+  virtual ~RovtioScene(){};
   void addKeyboardCB(unsigned char Key, std::function<void()> f){
     mScene.addKeyboardCB(Key,f);
   }
@@ -222,4 +222,4 @@ class RovioScene{
 }
 
 
-#endif /* ROVIO_ROVIOSCENE_HPP_ */
+#endif /* ROVTIO_ROVTIOSCENE_HPP_ */

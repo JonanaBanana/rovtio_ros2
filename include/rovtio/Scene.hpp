@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_SCENE_HPP_
-#define ROVIO_SCENE_HPP_
+#ifndef ROVTIO_SCENE_HPP_
+#define ROVTIO_SCENE_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include <opencv2/features2d/features2d.hpp>
@@ -263,4 +263,4 @@ static void initGlut(int argc, char** argv, Scene& scene){
 }
 
 
-#endif /* ROVIO_SCENE_HPP_ */
+#endif /* ROVTIO_SCENE_HPP_ */

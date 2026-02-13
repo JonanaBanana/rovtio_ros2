@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_MULTILEVELPATCH_HPP_
-#define ROVIO_MULTILEVELPATCH_HPP_
+#ifndef ROVTIO_MULTILEVELPATCH_HPP_
+#define ROVTIO_MULTILEVELPATCH_HPP_
 
 #include "rovtio/Patch.hpp"
 #include "rovtio/FeatureCoordinates.hpp"
@@ -221,4 +221,4 @@ public:
 }
 
 
-#endif /* ROVIO_MULTILEVELPATCH_HPP_ */
+#endif /* ROVTIO_MULTILEVELPATCH_HPP_ */

@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_VELOCITYUPDATE_HPP_
-#define ROVIO_VELOCITYUPDATE_HPP_
+#ifndef ROVTIO_VELOCITYUPDATE_HPP_
+#define ROVTIO_VELOCITYUPDATE_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/Update.hpp"
@@ -171,10 +171,11 @@ class VelocityUpdate: public LWF::Update<VelocityInnovation,FILTERSTATE,Velocity
    *
    *  @param F     - Jacobian for the update step of the filter.
    *  @param state - Filter state.
+   *  @param itered - If 1 iteration of EKF update is complete.
    *  @param meas  - Not used.
    *  @param dt    - Not used.
    */
-  void jacState(MXD& F, const mtState& state) const{
+  void jacState(MXD& F, const mtState& state, bool &itered) const{
     F.setZero();
     F.template block<3,3>(mtInnovation::template getId<mtInnovation::_vel>(),mtState::template getId<mtState::_vel>()) = MPD(qAM_).matrix();
   }
@@ -195,4 +196,4 @@ class VelocityUpdate: public LWF::Update<VelocityInnovation,FILTERSTATE,Velocity
 }
 
 
-#endif /* ROVIO_VELOCITYUPDATE_HPP_ */
+#endif /* ROVTIO_VELOCITYUPDATE_HPP_ */

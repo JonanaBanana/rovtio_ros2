@@ -41,25 +41,6 @@ namespace rovtio{
  *   @param imgIn - Input image.
  *   @param imgOut - Output image (halfsampled).
  */
-//void halfSample(const cv::Mat& imgIn,cv::Mat& imgOut){
-//  std::cerr << "This should not be used.\n";
-//  throw std::logic_error("Not implemented of floating points.\n");
-//  imgOut.create(imgIn.rows/2,imgIn.cols/2,imgIn.type());
-//  const int refStepIn = imgIn.step.p[0];
-//  const int refStepOut = imgOut.step.p[0];
-//  uint8_t* imgPtrInTop;
-//  uint8_t* imgPtrInBot;
-//  uint8_t* imgPtrOut;
-//  for(int y=0; y<imgOut.rows; ++y){
-//    imgPtrInTop =  imgIn.data + 2*y*refStepIn;
-//    imgPtrInBot =  imgIn.data + (2*y+1)*refStepIn;
-//    imgPtrOut = imgOut.data + y*refStepOut;
-//    for(int x=0; x<imgOut.cols; ++x, ++imgPtrOut, imgPtrInTop += 2, imgPtrInBot += 2)
-//    {
-//      *imgPtrOut = (imgPtrInTop[0]+imgPtrInTop[1]+imgPtrInBot[0]+imgPtrInBot[1])/4;
-//    }
-//  }
-//}
 
 /** \brief Image pyramid with selectable number of levels.
  *
@@ -145,14 +126,13 @@ class ImagePyramid{
     else
         imgs_[l].convertTo(histEqualizedLevelImg, CV_8UC1); //smk: needed as original input image is saved as float now, which is not accepted by FAST detector
     //CUSTOMIZATION
-
-#if (CV_MAJOR_VERSION < 3)
+    #if (CV_MAJOR_VERSION < 3)
     cv::FastFeatureDetector feature_detector_fast(detectionThreshold, true);
     feature_detector_fast.detect(histEqualizedLevelImg, keypoints); //CUSTOMIZATION
-#else
-    auto feature_detector_fast = cv::FastFeatureDetector::create(detectionThreshold, true);
-    feature_detector_fast->detect(histEqualizedLevelImg, keypoints); //CUSTOMIZATION
-#endif
+    #else
+        auto feature_detector_fast = cv::FastFeatureDetector::create(detectionThreshold, true);
+        feature_detector_fast->detect(histEqualizedLevelImg, keypoints); //CUSTOMIZATION
+    #endif
 
     candidates.reserve(candidates.size()+keypoints.size());
     for (auto it = keypoints.cbegin(), end = keypoints.cend(); it != end; ++it) {

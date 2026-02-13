@@ -26,8 +26,8 @@
  *
  */
 
-#ifndef ROVIO_FILTERSTATES_HPP_
-#define ROVIO_FILTERSTATES_HPP_
+#ifndef ROVTIO_FILTERSTATES_HPP_
+#define ROVTIO_FILTERSTATES_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/FilterState.hpp"
@@ -659,4 +659,4 @@ class FilterState: public LWF::FilterState<State<nMax,nLevels,patchSize,nCam,nPo
 }
 
 
-#endif /* ROVIO_FILTERSTATES_HPP_ */
+#endif /* ROVTIO_FILTERSTATES_HPP_ */

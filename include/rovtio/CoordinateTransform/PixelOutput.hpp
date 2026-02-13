@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_PIXELOUTPUT_HPP_
-#define ROVIO_PIXELOUTPUT_HPP_
+#ifndef ROVTIO_PIXELOUTPUT_HPP_
+#define ROVTIO_PIXELOUTPUT_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/CoordinateTransform.hpp"
@@ -67,4 +67,4 @@ class PixelOutputCT:public LWF::CoordinateTransform<FeatureOutput,PixelOutput>{
 }
 
 
-#endif /* ROVIO_PIXELOUTPUT_HPP_ */
+#endif /* ROVTIO_PIXELOUTPUT_HPP_ */

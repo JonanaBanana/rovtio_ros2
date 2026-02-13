@@ -26,15 +26,15 @@
 *
 */
 
-#ifndef ROVIO_EXCEPTION_HPP_
-#define ROVIO_EXCEPTION_HPP_
+#ifndef ROVTIO_EXCEPTION_HPP_
+#define ROVTIO_EXCEPTION_HPP_
 
 #include <string>
 #include <iostream>
 #include <exception>
 #include <typeinfo>
 
-#define ROVIO_THROW(exceptionType) {                    \
+#define ROVTIO_THROW(exceptionType) {                    \
   throw exceptionType(__FUNCTION__,__FILE__,__LINE__);  \
 }
 
@@ -65,7 +65,7 @@ namespace rovtio {
 }
 
 /* Usage:
- * ROVIO_THROW(rovio::CameraNullPtrException);
+ * ROVTIO_THROW(rovio::CameraNullPtrException);
  */
 
-#endif /* ROVIO_EXCEPTION_HPP_ */
+#endif /* ROVTIO_EXCEPTION_HPP_ */

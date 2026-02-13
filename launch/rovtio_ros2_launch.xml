@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <node pkg="rovtio" exec="rovtio_node" name="rovtio" output="screen">
+    <param name="filter_config" value="$(find-pkg-share rovtio)/cfg/rovtio/rovtio.info"/>
+    <param name="imu_topic" value="/imu0"/>
+    <param name="camera_topic0" value="/cam0/image_raw"/>
+    <param name="camera_topic1" value="/cam1/image_raw"/>
+    <param name="camera0_config" value="$(find-pkg-share rovtio)/cfg/rovtio/euroc_cam1.yaml"/>
+    <param name="camera1_config" value="$(find-pkg-share rovtio)/cfg/rovtio/euroc_cam2.yaml"/>
+    <param name="cam0_offset" value="0.0"/>
+    <param name="cam1_offset" value="-0.02414188675155223"/>
+    <param name="maxDelayBeforeDropping" value="-0.2"/>
+    <param name="storeRuntimes" value="false"/>
+    <param name="maxTimeCamInactive" value="0.12"/>
+    <remap from="/rovtio/odometry" to="/rovtio/odometry"/>
+  </node>
+</launch>

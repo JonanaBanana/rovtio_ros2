@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_IMGUPDATE_HPP_
-#define ROVIO_IMGUPDATE_HPP_
+#ifndef ROVTIO_IMGUPDATE_HPP_
+#define ROVTIO_IMGUPDATE_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/Update.hpp"
@@ -84,6 +84,12 @@ namespace rovtio {
       imgTime_ = t;
     }
 
+    bool areAllValid(){
+    for(int i=0;i<STATE::nCam_;i++){
+      if(isValidPyr_[i] == false) return false;
+    }
+    return true;
+  }
     ImagePyramid<STATE::nLevels_> pyr_[STATE::nCam_];
     double imgTime_;
     int activeModality_; // The camera ID of the camera that took the image which is being updated.
@@ -681,7 +687,7 @@ namespace rovtio {
         else
           meas.aux().pyr_[meas.aux().activeModality_].imgs_[0].convertTo(tmpImg, CV_8UC1);
         //Convert Image to color for drawing purposes
-        cvtColor(tmpImg, filterState.img_[meas.aux().activeModality_], CV_GRAY2RGB);
+        cvtColor(tmpImg, filterState.img_[meas.aux().activeModality_], cv::COLOR_GRAY2RGB);
       }
       filterState.imgTime_ = filterState.t_;
       filterState.imageCounter_++;
@@ -1518,4 +1524,4 @@ namespace rovtio {
 }
 
 
-#endif /* ROVIO_IMGUPDATE_HPP_ */
+#endif /* ROVTIO_IMGUPDATE_HPP_ */

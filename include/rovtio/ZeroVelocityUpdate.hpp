@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_ZEROVELOCITYUPDATE_HPP_
-#define ROVIO_ZEROVELOCITYUPDATE_HPP_
+#ifndef ROVTIO_ZEROVELOCITYUPDATE_HPP_
+#define ROVTIO_ZEROVELOCITYUPDATE_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/Update.hpp"
@@ -149,10 +149,9 @@ ZeroVelocityUpdateNoise<typename FILTERSTATE::mtState>,ZeroVelocityOutlierDetect
    *
    *  @param F     - Jacobian for the update step of the filter.
    *  @param state - Filter state.
-   *  @param meas  - Not used.
-   *  @param dt    - Not used.
+   *  @param itered - if one iteration of IEKF is complete
    */
-  void jacState(MXD& F, const mtState& state) const{
+  void jacState(MXD& F, const mtState& state, bool &itered) const{
     F.setZero();
     F.template block<3,3>(mtInnovation::template getId<mtInnovation::_vel>(),mtState::template getId<mtState::_vel>()) = Eigen::Matrix3d::Identity();
   }
@@ -173,4 +172,4 @@ ZeroVelocityUpdateNoise<typename FILTERSTATE::mtState>,ZeroVelocityOutlierDetect
 }
 
 
-#endif /* ROVIO_ZEROVELOCITYUPDATE_HPP_ */
+#endif /* ROVTIO_ZEROVELOCITYUPDATE_HPP_ */

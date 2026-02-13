@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_YPROUTPUT_HPP_
-#define ROVIO_YPROUTPUT_HPP_
+#ifndef ROVTIO_YPROUTPUT_HPP_
+#define ROVTIO_YPROUTPUT_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/CoordinateTransform.hpp"
@@ -71,4 +71,4 @@ class AttitudeToYprCT:public LWF::CoordinateTransform<AttitudeOutput,YprOutput>{
 }
 
 
-#endif /* ROVIO_YPROUTPUT_HPP_ */
+#endif /* ROVTIO_YPROUTPUT_HPP_ */

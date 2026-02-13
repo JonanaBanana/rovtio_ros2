@@ -1,7 +1,7 @@
 /*! \mainpage Documentation
  *
  * \section intro_sec Introduction
- *   ROVIO is a visual-inertial odometry framework which, by directly using pixel
+ *   ROVTIO is a visual-inertial odometry framework which, by directly using pixel
  *   intensity errors of image patches, achieves accurate tracking
  *   performance while exhibiting a very high level of robustness.
  *
@@ -26,5 +26,5 @@
  * 
  */
  
- \cond ----------- Document the the rovio namespace. ------------   \endcond
+ \cond ----------- Document the the rovtio namespace. ------------   \endcond
  /*! \namespace rovtio */

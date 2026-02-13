@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_PATCH_HPP_
-#define ROVIO_PATCH_HPP_
+#ifndef ROVTIO_PATCH_HPP_
+#define ROVTIO_PATCH_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "rovtio/FeatureCoordinates.hpp"
@@ -144,56 +144,40 @@ class Patch {
    */
   void drawPatch(cv::Mat &drawImg, const cv::Point2i &c, int stretch = 1, const bool withBorder = false) const
   {
-      // From rotio
-//      const int refStepY = drawImg.step.p[0]; // Original
-//      const int refStepX = drawImg.step.p[1]; // Original
     const int refStepY = drawImg.step1(0); // Custom
     const int refStepX = drawImg.step1(1); // Custom
-      //uint8_t *img_ptr; //ORIGINAL
-      float *img_ptr; //smk: replace by float*
-      const float *it_patch;
-      if (withBorder)
+    float *img_ptr; //smk: replace by float*
+    const float *it_patch;
+    if (withBorder)
+    {
+      it_patch = patchWithBorder_;
+    } 
+    else 
+    {
+      it_patch = patch_;
+    }
+    for (int y = 0; y < patchSize + 2 * (int)withBorder; ++y, it_patch += patchSize + 2 * (int)withBorder)
+    {
+      img_ptr = (float *)drawImg.data + (c.y + y * stretch) * refStepY + c.x * refStepX; //CUSTOMIZATION
+      for (int x = 0; x < patchSize + 2 * (int)withBorder; ++x)
       {
-          it_patch = patchWithBorder_;
+        for (int i = 0; i < stretch; ++i)
+        {
+          for (int j = 0; j < stretch; ++j)
+          {
+            img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 0] = (float)(it_patch[x]); //CUSTOMIZATION
+            if (drawImg.channels() == 3)
+            {
+              img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 1] = (float)(it_patch[x]); //CUSTOMIZATION
+              img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 2] = (float)(it_patch[x]); //CUSTOMIZATION
+            }
+          }
+        }
       }
-      else
-      {
-          it_patch = patch_;
-      }
-      for (int y = 0; y < patchSize + 2 * (int)withBorder; ++y, it_patch += patchSize + 2 * (int)withBorder)
-      {
-          //img_ptr = (uint8_t *)drawImg.data + (c.y + y * stretch) * refStepY + c.x * refStepX; //ORIGINAL
-          img_ptr = (float *)drawImg.data + (c.y + y * stretch) * refStepY + c.x * refStepX; //CUSTOMIZATION
-          for (int x = 0; x < patchSize + 2 * (int)withBorder; ++x)
-              for (int i = 0; i < stretch; ++i)
-              {
-                  for (int j = 0; j < stretch; ++j)
-                  {
-                      //img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 0] = (uint8_t)(it_patch[x]); //ORIGINAL
-                      img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 0] = (float)(it_patch[x]); //CUSTOMIZATION
-                      if (drawImg.channels() == 3)
-                      {
-                          //img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 1] = (uint8_t)(it_patch[x]); //ORIGINAL
-                          //img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 2] = (uint8_t)(it_patch[x]); //ORIGINAL
-                          img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 1] = (float)(it_patch[x]); //CUSTOMIZATION
-                          img_ptr[x * stretch * refStepX + i * refStepY + j * refStepX + 2] = (float)(it_patch[x]); //CUSTOMIZATION
-                      }
-                  }
-              }
-      }
+    }
   }
-//  void drawPatch(cv::Mat& drawImg,const cv::Point2i& c,int stretch = 1,const bool withBorder = false) const{
-//      // CUSTOM: Duplicated the drawPatch method for the case of 16bit images
-//      if (drawImg.type() == 0){ // 0==CV_8U
-//          drawPatch_8bit(drawImg,c,stretch,withBorder);
-//      } else if (drawImg.type() == 2) {// 2 == CV_16U
-//        drawPatch_16bit(drawImg,c,stretch,withBorder);
-//      }
-//  }
 
   void drawPatch_8bit(cv::Mat& drawImg,const cv::Point2i& c,int stretch = 1,const bool withBorder = false) const{
-//      const int refStepY = drawImg.step.p[0]; // Original
-//      const int refStepX = drawImg.step.p[1]; // Original
     const int refStepY = drawImg.step1(0); // Custom
     const int refStepX = drawImg.step1(1); // Custom
     uint8_t* img_ptr;
@@ -218,8 +202,6 @@ class Patch {
     }
   }
     void drawPatch_16bit(cv::Mat& drawImg,const cv::Point2i& c,int stretch = 1,const bool withBorder = false) const{
-//      const int refStepY = drawImg.step.p[0]; // Original
-//      const int refStepX = drawImg.step.p[1]; // Original
       const int refStepY = drawImg.step1(0); // Custom
       const int refStepX = drawImg.step1(1); // Custom
         uint16_t* img_ptr;
@@ -385,4 +367,4 @@ class Patch {
 }
 
 
-#endif /* ROVIO_PATCH_HPP_ */
+#endif /* ROVTIO_PATCH_HPP_ */

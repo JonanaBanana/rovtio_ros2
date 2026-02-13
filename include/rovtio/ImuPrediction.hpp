@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_IMUPREDICTION_HPP_
-#define ROVIO_IMUPREDICTION_HPP_
+#ifndef ROVTIO_IMUPREDICTION_HPP_
+#define ROVTIO_IMUPREDICTION_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/Prediction.hpp"
@@ -294,4 +294,4 @@ class ImuPrediction: public LWF::Prediction<FILTERSTATE>{
 }
 
 
-#endif /* ROVIO_IMUPREDICTION_HPP_ */
+#endif /* ROVTIO_IMUPREDICTION_HPP_ */

@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_MULTICAMERA_HPP_
-#define ROVIO_MULTICAMERA_HPP_
+#ifndef ROVTIO_MULTICAMERA_HPP_
+#define ROVTIO_MULTICAMERA_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "rovtio/Camera.hpp"
@@ -129,4 +129,4 @@ class MultiCamera{
 }
 
 
-#endif /* ROVIO_MULTICAMERA_HPP_ */
+#endif /* ROVTIO_MULTICAMERA_HPP_ */

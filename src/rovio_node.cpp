@@ -33,101 +33,115 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <ros/ros.h>
-#include <ros/package.h>
-#include <geometry_msgs/Pose.h>
+#include <rclcpp/rclcpp.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #pragma GCC diagnostic pop
 
-#include "rovtio/RovioFilter.hpp"
-#include "rovtio/RovioNode.hpp"
+#include "rovtio/RovtioFilter.hpp"
+#include "rovtio/RovtioNode.hpp"
+
+
 #ifdef MAKE_SCENE
-#include "rovio/RovioScene.hpp"
+#include "rovtio/RovtioScene.hpp"
 #endif
 
-#ifdef ROVIO_NMAXFEATURE
-static constexpr int nMax_ = ROVIO_NMAXFEATURE;
+#ifdef ROVTIO_NMAXFEATURE
+static constexpr int nMax_ = ROVTIO_NMAXFEATURE;
 #else
 static constexpr int nMax_ = 25; // Maximal number of considered features in the filter state.
 #endif
 
-#ifdef ROVIO_NLEVELS
-static constexpr int nLevels_ = ROVIO_NLEVELS;
+#ifdef ROVTIO_NLEVELS
+static constexpr int nLevels_ = ROVTIO_NLEVELS;
 #else
 static constexpr int nLevels_ = 4; // // Total number of pyramid levels considered.
 #endif
 
-#ifdef ROVIO_PATCHSIZE
-static constexpr int patchSize_ = ROVIO_PATCHSIZE;
+#ifdef ROVTIO_PATCHSIZE
+static constexpr int patchSize_ = ROVTIO_PATCHSIZE;
 #else
 static constexpr int patchSize_ = 6; // Edge length of the patches (in pixel). Must be a multiple of 2!
 #endif
 
-#ifdef ROVIO_NCAM
-static constexpr int nCam_ = ROVIO_NCAM;
+#ifdef ROVTIO_NCAM
+static constexpr int nCam_ = ROVTIO_NCAM;
 #else
 static constexpr int nCam_ = 1; // Used total number of cameras.
 #endif
 
-#ifdef ROVIO_NPOSE
-static constexpr int nPose_ = ROVIO_NPOSE;
+#ifdef ROVTIO_NPOSE
+static constexpr int nPose_ = ROVTIO_NPOSE;
 #else
 static constexpr int nPose_ = 0; // Additional pose states.
 #endif
 
-typedef rovtio::RovioFilter<rovtio::FilterState<nMax_,nLevels_,patchSize_,nCam_,nPose_>> mtFilter;
+typedef rovtio::RovtioFilter<rovtio::FilterState<nMax_,nLevels_,patchSize_,nCam_,nPose_>> mtFilter;
 
-#ifdef MAKE_SCENE
-static rovtio::RovioScene<mtFilter> mRovioScene;
-
-void idleFunc(){
-  ros::spinOnce();
-  mRovioScene.drawScene(mRovioScene.mpFilter_->safe_);
+/**
+ * @brief Function to read the camera calibration parameters. File path are ros params of node.
+ * @param mpFilter
+ * @param node
+ * @return None
+ */
+void readCameraConfig(std::shared_ptr<mtFilter> mpFilter,
+                      std::shared_ptr<rovtio::RovtioNode<mtFilter>> node) {
+  for (unsigned int camID = 0; camID < nCam_; ++camID) {
+    std::string camera_config;
+    if (node->get_parameter("camera" + std::to_string(camID)
+                            + "_config", camera_config)) {
+      std::cout << "Camera config: " << camera_config << std::endl;
+      mpFilter->cameraCalibrationFile_[camID] = camera_config;
+    }
+  }
 }
-#endif
 
-int main(int argc, char** argv){
-  ros::init(argc, argv, "rovtio");
-  ros::NodeHandle nh;
-  ros::NodeHandle nh_private("~");
+/**
+ * @brief Function to declare the camera config parameters
+ * @param ROVTIO node share ptr
+ * @return none
+ */
+void declareParameters(std::shared_ptr<rovtio::RovtioNode<mtFilter>> node)
+{
+  for (unsigned int camID = 0; camID < nCam_; ++camID) {
+    std::string camera_config;
+    node->declare_parameter("camera" + std::to_string(camID)
+                            + "_config","");
+  }
+  node->declare_parameter("filter_config", "");
+}
 
-  std::string rootdir = ros::package::getPath("rovtio"); // Leaks memory
-  std::string filter_config = rootdir + "/cfg/rovio.info";
 
-  nh_private.param("filter_config", filter_config, filter_config);
+ int main(int argc, char** argv){
+  rclcpp::init(argc, argv);
+  // Filter
+  std::shared_ptr<mtFilter> mpFilter(new mtFilter);
+  std::string filter_config;
+
+  std::string rootdir = ament_index_cpp::get_package_share_directory("rovtio");
+  std::string filter_config = "~/rovtio_ros2_ws/src/rovtio_ros2/cfg/rovtio/rovtio.info";
+
+  nh_private->declare_parameter("filter_config", filter_config);
 
   // Filter
   std::shared_ptr<mtFilter> mpFilter(new mtFilter);
   mpFilter->readFromInfo(filter_config);
 
-  // Force the camera calibration paths to the ones from ROS parameters.
-  for (unsigned int camID = 0; camID < nCam_; ++camID) {
-    std::string camera_config;
-    if (nh_private.getParam("camera" + std::to_string(camID)
-                            + "_config", camera_config)) {
-      mpFilter->cameraCalibrationFile_[camID] = camera_config;
-    }
-  }
-  std::cout << "Max number of features: " << nMax_ << '\n';
-  mpFilter->refreshProperties();
+  rclcpp::init(argc, argv);
+  // Filter
+  std::shared_ptr<mtFilter> mpFilter(new mtFilter);
+  std::string filter_config;
 
   // Node
-  rovtio::RovioNode<mtFilter> rovioNode(nh, nh_private, mpFilter);
-  rovioNode.makeTest();
-
-#ifdef MAKE_SCENE
-  // Scene
-  std::string mVSFileName = rootdir + "/shaders/shader.vs";
-  std::string mFSFileName = rootdir + "/shaders/shader.fs";
-  mRovioScene.initScene(argc,argv,mVSFileName,mFSFileName,mpFilter);
-  mRovioScene.setIdleFunction(idleFunc);
-  mRovioScene.addKeyboardCB('r',[&rovioNode]() mutable {rovioNode.requestReset();});
-  glutMainLoop();
-#else
-  ros::spin(); // Original
-  //Custom to do this multithreaded
-//  ros::MultiThreadedSpinner spinner(4); // Use 4 threads
-//  spinner.spin(); // spin() will not return until the node has been shutdown
-  // End custom
-#endif
+  std::shared_ptr<rovtio::RovtioNode<rovtio::RovtioFilter<rovtio::FilterState<25, 4, 6, 1, 0>>>> node;
+  node = std::make_shared<rovtio::RovtioNode<mtFilter>>(mpFilter);
+  declareParameters(node);
+  node->get_parameter("filter_config", filter_config);
+  mpFilter->readFromInfo(filter_config);
+  std::cout << "Filter config: " << filter_config << std::endl;
+  readCameraConfig(mpFilter, node);
+  mpFilter->refreshProperties();
+  node->makeTest();
+  rclcpp::spin(node);
+  rclcpp::shutdown();
   return 0;
 }

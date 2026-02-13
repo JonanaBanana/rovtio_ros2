@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_POSEUPDATE_HPP_
-#define ROVIO_POSEUPDATE_HPP_
+#ifndef ROVTIO_POSEUPDATE_HPP_
+#define ROVTIO_POSEUPDATE_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/Update.hpp"
@@ -118,7 +118,7 @@ class PoseOutlierDetection: public LWF::OutlierDetection<LWF::ODEntry<PoseInnova
  * Coordinate frames overview:
  * I: Inertial frame of measured pose
  * V: Body frame of measured pose
- * W: Inertial frame of ROVIO
+ * W: Inertial frame of ROVTIO
  * M: IMU-coordinate frame
  *
  *  @tparam FILTERSTATE         - FilterState
@@ -151,7 +151,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
   double timeOffset_;
   bool enablePosition_;
   bool enableAttitude_;
-  bool noFeedbackToRovio_;
+  bool noFeedbackToRovtio_;
   bool doInertialAlignmentAtStart_;
   bool didAlignment_;
   bool useOdometryCov_;
@@ -166,7 +166,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     timeOffset_ = 0.0;
     enablePosition_ = true;
     enableAttitude_ = true;
-    noFeedbackToRovio_ = true;
+    noFeedbackToRovtio_ = true;
     doInertialAlignmentAtStart_ = true;
     didAlignment_ = false;
     useOdometryCov_ = false;
@@ -243,7 +243,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
   void jacState(MXD& F, const mtState& state) const{
     F.setZero();
     if(enablePosition_){
-      if(!noFeedbackToRovio_){
+      if(!noFeedbackToRovtio_){
         F.template block<3,3>(mtInnovation::template getId<mtInnovation::_pos>(),mtState::template getId<mtState::_pos>()) =
             MPD(get_qWI(state).inverted()).matrix();
         F.template block<3,3>(mtInnovation::template getId<mtInnovation::_pos>(),mtState::template getId<mtState::_att>()) =
@@ -261,7 +261,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
       }
     }
     if(enableAttitude_){
-      if(!noFeedbackToRovio_){
+      if(!noFeedbackToRovtio_){
         F.template block<3,3>(mtInnovation::template getId<mtInnovation::_att>(),mtState::template getId<mtState::_att>()) =
             -MPD(get_qVM(state)*state.qWM().inverted()).matrix();
       }
@@ -328,4 +328,4 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
 }
 
 
-#endif /* ROVIO_POSEUPDATE_HPP_ */
+#endif /* ROVTIO_POSEUPDATE_HPP_ */

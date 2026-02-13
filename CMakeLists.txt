@@ -1,137 +1,142 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.14.4)
 project(rovtio)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -march=native")
-set(ROVIO_NMAXFEATURE 25 CACHE STRING "Number of feature for ROVIO")
-set(ROVIO_NCAM 1 CACHE STRING "Number of enabled cameras")
-set(ROVIO_NLEVELS 4 CACHE STRING "Number of image leavels for the features")
-set(ROVIO_PATCHSIZE 6 CACHE STRING "Size of patch (edge length in pixel)")
-set(ROVIO_NPOSE 0 CACHE STRING "Additional estimated poses for external pose measurements")
-add_definitions(-DROVIO_NMAXFEATURE=${ROVIO_NMAXFEATURE})
-add_definitions(-DROVIO_NCAM=${ROVIO_NCAM})
-add_definitions(-DROVIO_NLEVELS=${ROVIO_NLEVELS})
-add_definitions(-DROVIO_PATCHSIZE=${ROVIO_PATCHSIZE})
-add_definitions(-DROVIO_NPOSE=${ROVIO_NPOSE})
 
-# Custom for profiling
-# SET(GCC_COVERAGE_COMPILE_FLAGS "-fno-omit-frame-pointer")
-# SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
-# End custom
+# Default to C++17
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic -Wnon-virtual-dtor -Woverloaded-virtual)
+endif()
+
+
+# ROVTIO PARAMETERS
+set(ROVTIO_NMAXFEATURE 25 CACHE STRING "Number of feature for ROVTIO")
+set(ROVTIO_NCAM 1 CACHE STRING "Number of enabled cameras")
+set(ROVTIO_NLEVELS 4 CACHE STRING "Number of image leavels for the features")
+set(ROVTIO_PATCHSIZE 6 CACHE STRING "Size of patch (edge length in pixel)")
+set(ROVTIO_NPOSE 0 CACHE STRING "Additional estimated poses for external pose measurements")
+add_definitions(-DROVTIO_NMAXFEATURE=${ROVTIO_NMAXFEATURE})
+add_definitions(-DROVTIO_NCAM=${ROVTIO_NCAM})
+add_definitions(-DROVTIO_NLEVELS=${ROVTIO_NLEVELS})
+add_definitions(-DROVTIO_PATCHSIZE=${ROVTIO_PATCHSIZE})
+add_definitions(-DROVTIO_NPOSE=${ROVTIO_NPOSE})
+
 add_subdirectory(lightweight_filtering)
 
-##################### Find, include, and compile library #####################
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-if(0)
-	find_package(OpenMP REQUIRED)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
+include_directories(${PROJECT_SOURCE_DIR}/lightweight_filtering/include)
+
+# --- Dependencies ---
+find_package(ament_cmake REQUIRED)
 find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
-
 find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc features2d)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(rosbag2_cpp REQUIRED)
+find_package(rosbag2_storage REQUIRED)
+find_package(image_transport REQUIRED)
+
+# YAML
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(YamlCpp REQUIRED yaml-cpp>=0.5)
+
+find_package(rovtio_interfaces REQUIRED)
+ament_export_dependencies(rosidl_default_runtime)
+
+# --- Includes ---
+include_directories(
+		include
+		${EIGEN3_INCLUDE_DIR}
+		${YamlCpp_INCLUDE_DIRS}
+)
+
+# --- Library ---
+set(ROVTIO_SRC
+		src/Camera.cpp
+		src/FeatureCoordinates.cpp
+		src/FeatureDistance.cpp
+)
 
 if(MAKE_SCENE)
-	message(STATUS "Building ROVTIO with openGL Scene Visualization")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAKE_SCENE=1")
-	find_package(GLEW REQUIRED)
-	include_directories(${GLEW_INCLUDE_DIRS})
-
-	find_package(GLUT REQUIRED)
-	include_directories(${GLUT_INCLUDE_DIRS})
-	link_directories(${GLUT_LIBRARY_DIRS})
-	add_definitions(${GLUT_DEFINITIONS})
-
-	find_package(OpenGL REQUIRED)
-	include_directories(${OpenGL_INCLUDE_DIRS})
-	link_directories(${OpenGL_LIBRARY_DIRS})
-	add_definitions(${OpenGL_DEFINITIONS})
-endif()
-
-find_package(PkgConfig)
-
-find_package(yaml_cpp_catkin QUIET)
-if(${yaml_cpp_catkin_FOUND})
-  message(STATUS "Found yaml_cpp_catkin, using instead of system library.")
-  set(YamlCpp_LIBRARIES ${yaml_cpp_catkin_LIBRARIES})
-  set(YamlCpp_INCLUDE_DIRS ${yaml_cpp_catkin_INCLUDE_DIRS})
-else()
-  message(STATUS "No yaml_cpp_catkin, using yaml-cpp system library instead.")
-  pkg_check_modules(YamlCpp REQUIRED yaml-cpp>=0.5)
+	list(APPEND ROVTIO_SRC src/Scene.cpp)
 endif()
 
 
-##################### Install ROS stuff #####################
-find_package(catkin REQUIRED COMPONENTS
-	lightweight_filtering
-  	kindr
-	roscpp
-	roslib
-	cv_bridge
-	message_generation
-	nav_msgs
-	geometry_msgs
-	sensor_msgs
-	std_msgs
-	tf
-	rosbag
+add_library(${PROJECT_NAME}_lib ${ROVTIO_SRC})
+ament_target_dependencies(${PROJECT_NAME}_lib
+		rclcpp
+		geometry_msgs
+		nav_msgs
+		sensor_msgs
+		std_msgs
+		cv_bridge
+		tf2
+		std_srvs
+		visualization_msgs
+		rosbag2_cpp
+		rosbag2_storage
+		rovtio_interfaces
+		image_transport
 )
-
-add_service_files(
-  DIRECTORY srv
-  FILES SrvResetToPose.srv
-)
-
-generate_messages(DEPENDENCIES
-  std_msgs
-  geometry_msgs
-)
-
-catkin_package(
-	INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
-    LIBRARIES ${PROJECT_NAME}
-	CATKIN_DEPENDS
-	lightweight_filtering
-  	kindr
-	roscpp
-	roslib
-	cv_bridge
-	message_runtime
-	nav_msgs
-	geometry_msgs
-	sensor_msgs
-	std_msgs
-	tf
-	rosbag
-    yaml_cpp_catkin
+target_link_libraries(${PROJECT_NAME}_lib
+		${YamlCpp_LIBRARIES}
+		${OpenCV_LIBRARIES}
 )
 
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${YamlCpp_INCLUDE_DIRS})
+# --- Executables ---
+add_executable(rovtio_node src/rovtio_node.cpp)
+ament_target_dependencies(rovtio_node rclcpp rovtio_interfaces)
+target_link_libraries(rovtio_node ${PROJECT_NAME}_lib)
 
-if(MAKE_SCENE)
-	add_library(${PROJECT_NAME} src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp src/Scene.cpp)
-else()
-	add_library(${PROJECT_NAME} src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
-endif()
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} ${OpenCV_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${rovtio_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} rovtio_generate_messages_cpp)
+add_executable(rovtio_rosbag_loader src/rovtio_rosbag_loader.cpp)
+ament_target_dependencies(rovtio_rosbag_loader rclcpp)
+target_link_libraries(rovtio_rosbag_loader ${PROJECT_NAME}_lib)
 
-add_executable(${PROJECT_NAME}_node src/rovio_node.cpp)
-target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME})
+add_executable(feature_tracker_node src/feature_tracker_node.cpp)
+ament_target_dependencies(feature_tracker_node rclcpp)
+target_link_libraries(feature_tracker_node ${PROJECT_NAME}_lib)
 
-add_executable(${PROJECT_NAME}_rosbag_loader src/rovio_rosbag_loader.cpp)
-target_link_libraries(${PROJECT_NAME}_rosbag_loader ${PROJECT_NAME})
-add_dependencies(${PROJECT_NAME}_rosbag_loader ${rovtio_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# --- Install ---
+install(TARGETS
+		${PROJECT_NAME}_lib
+		rovtio_node
+		rovtio_rosbag_loader
+		feature_tracker_node
+		DESTINATION lib/${PROJECT_NAME}
+)
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/")
-	message(STATUS "Building GTests!")
-	option(BUILD_GTEST "build gtest" ON)
-	#add_subdirectory(gtest gtest)
-	enable_testing()
-	include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-	add_executable(test_patch src/test_patch.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
-	target_link_libraries(test_patch gtest_main gtest pthread ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES})
-	add_test(test_patch test_patch)
-	add_executable(test_mlp src/test_mlp.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
-	target_link_libraries(test_mlp gtest_main gtest pthread ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES})
-	add_test(test_mlp test_mlp)
-endif()
+install(DIRECTORY include/
+		DESTINATION include/
+)
+
+install(DIRECTORY launch/
+		DESTINATION share/${PROJECT_NAME}/launch)
+install(DIRECTORY cfg/
+		DESTINATION share/${PROJECT_NAME}/cfg)
+
+# --- Export for downstream packages ---
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME}_lib)
+ament_export_dependencies(
+		rclcpp
+		std_msgs
+		geometry_msgs
+		nav_msgs
+		sensor_msgs
+		cv_bridge
+		tf2
+		rosidl_default_runtime
+		image_transport
+)
+
+ament_package()

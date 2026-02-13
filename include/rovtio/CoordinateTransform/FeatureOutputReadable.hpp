@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_FEATUREOUTPUTREADABLE_HPP_
-#define ROVIO_FEATUREOUTPUTREADABLE_HPP_
+#ifndef ROVTIO_FEATUREOUTPUTREADABLE_HPP_
+#define ROVTIO_FEATUREOUTPUTREADABLE_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/CoordinateTransform.hpp"
@@ -94,4 +94,4 @@ class FeatureOutputReadableCT:public LWF::CoordinateTransform<FeatureOutput,Feat
 }
 
 
-#endif /* ROVIO_FEATUREOUTPUTREADABLE_HPP_ */
+#endif /* ROVTIO_FEATUREOUTPUTREADABLE_HPP_ */

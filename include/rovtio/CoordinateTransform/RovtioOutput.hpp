@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIOOUTPUT_HPP_
-#define ROVIOOUTPUT_HPP_
+#ifndef ROVTIOOUTPUT_HPP_
+#define ROVTIOOUTPUT_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/CoordinateTransform.hpp"
@@ -180,4 +180,4 @@ class ImuOutputCT:public LWF::CoordinateTransform<STATE,StandardOutput>{
 }
 
 
-#endif /* ROVIOOUTPUT_HPP_ */
+#endif /* ROVTIOOUTPUT_HPP_ */

@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_ROVIO_FILTER_HPP_
-#define ROVIO_ROVIO_FILTER_HPP_
+#ifndef ROVTIO_ROVTIO_FILTER_HPP_
+#define ROVTIO_ROVTIO_FILTER_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/FilterBase.hpp"
@@ -39,12 +39,12 @@
 #include "rovtio/MultiCamera.hpp"
 
 namespace rovtio {
-/** \brief Class, defining the Rovio Filter.
+/** \brief Class, defining the Rovtio Filter.
  *
- *  @tparam FILTERSTATE - \ref rovio::FilterState
+ *  @tparam FILTERSTATE - \ref rovtio::FilterState
  */
 template<typename FILTERSTATE>
-class RovioFilter:public LWF::FilterBase<ImuPrediction<FILTERSTATE>,
+class RovtioFilter:public LWF::FilterBase<ImuPrediction<FILTERSTATE>,
                                          ImgUpdate<FILTERSTATE>,
                                          PoseUpdate<FILTERSTATE,(int)(FILTERSTATE::mtState::nPose_>0)-1,(int)(FILTERSTATE::mtState::nPose_>1)*2-1>,
                                          VelocityUpdate<FILTERSTATE>>{
@@ -76,7 +76,7 @@ class RovioFilter:public LWF::FilterBase<ImuPrediction<FILTERSTATE>,
 
   /** \brief Constructor. Initializes the filter.
    */
-  RovioFilter(){
+  RovtioFilter(){
     updateToUpdateMeasOnly_ = true;
     std::get<0>(mUpdates_).setCamera(&multiCamera_);
     init_.setCamera(&multiCamera_);
@@ -192,7 +192,7 @@ class RovioFilter:public LWF::FilterBase<ImuPrediction<FILTERSTATE>,
 
   /** \brief Destructor
    */
-  virtual ~RovioFilter(){};
+  virtual ~RovtioFilter(){};
 //  void resetToImuPose(V3D WrWM, QPD qMW, double t = 0.0){
 //    init_.state_.initWithImuPose(WrWM,qMW);
 //    reset(t);
@@ -235,4 +235,4 @@ class RovioFilter:public LWF::FilterBase<ImuPrediction<FILTERSTATE>,
 }
 
 
-#endif /* ROVIO_ROVIO_FILTER_HPP_ */
+#endif /* ROVTIO_ROVTIO_FILTER_HPP_ */

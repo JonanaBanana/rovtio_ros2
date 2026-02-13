@@ -26,8 +26,8 @@
 *
 */
 
-#ifndef ROVIO_LANDMARKOUTPUTIMU_HPP_
-#define ROVIO_LANDMARKOUTPUTIMU_HPP_
+#ifndef ROVTIO_LANDMARKOUTPUTIMU_HPP_
+#define ROVTIO_LANDMARKOUTPUTIMU_HPP_
 
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/CoordinateTransform.hpp"
@@ -101,4 +101,4 @@ class LandmarkOutputImuCT:public LWF::CoordinateTransform<STATE,LandmarkOutput>{
 }
 
 
-#endif /* ROVIO_LANDMARKOUTPUTIMU_HPP_ */
+#endif /* ROVTIO_LANDMARKOUTPUTIMU_HPP_ */
