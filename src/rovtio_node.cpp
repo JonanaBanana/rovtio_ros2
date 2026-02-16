@@ -117,20 +117,6 @@ void declareParameters(std::shared_ptr<rovtio::RovtioNode<mtFilter>> node)
   std::shared_ptr<mtFilter> mpFilter(new mtFilter);
   std::string filter_config;
 
-  std::string rootdir = ament_index_cpp::get_package_share_directory("rovtio");
-  std::string filter_config = "~/rovtio_ros2_ws/src/rovtio_ros2/cfg/rovtio/rovtio.info";
-
-  nh_private->declare_parameter("filter_config", filter_config);
-
-  // Filter
-  std::shared_ptr<mtFilter> mpFilter(new mtFilter);
-  mpFilter->readFromInfo(filter_config);
-
-  rclcpp::init(argc, argv);
-  // Filter
-  std::shared_ptr<mtFilter> mpFilter(new mtFilter);
-  std::string filter_config;
-
   // Node
   std::shared_ptr<rovtio::RovtioNode<rovtio::RovtioFilter<rovtio::FilterState<25, 4, 6, 1, 0>>>> node;
   node = std::make_shared<rovtio::RovtioNode<mtFilter>>(mpFilter);

@@ -41,6 +41,7 @@ find_package(visualization_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
 find_package(rosbag2_storage REQUIRED)
 find_package(image_transport REQUIRED)
@@ -80,6 +81,7 @@ ament_target_dependencies(${PROJECT_NAME}_lib
 		std_msgs
 		cv_bridge
 		tf2
+		tf2_ros
 		std_srvs
 		visualization_msgs
 		rosbag2_cpp
@@ -135,6 +137,7 @@ ament_export_dependencies(
 		sensor_msgs
 		cv_bridge
 		tf2
+		tf2_ros
 		rosidl_default_runtime
 		image_transport
 )
