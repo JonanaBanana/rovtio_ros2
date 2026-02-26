@@ -143,8 +143,7 @@ class Update: public ModelBase<Update<Innovation,FilterState,Meas,Noise,OutlierD
   }
   template<int i,typename std::enable_if<i==0>::type* = nullptr>
   void jacInput_(Eigen::MatrixXd& F, const mtInputTuple& inputs, double dt) const{
-    bool itered = false;
-    jacState(F,std::get<0>(inputs), itered);
+    jacState(F,std::get<0>(inputs));
   }
   template<int i,typename std::enable_if<i==1>::type* = nullptr>
   void jacInput_(Eigen::MatrixXd& F, const mtInputTuple& inputs, double dt) const{
@@ -156,7 +155,7 @@ class Update: public ModelBase<Update<Innovation,FilterState,Meas,Noise,OutlierD
     n.setIdentity();
     evalInnovation(y,state,n);
   }
-  virtual void jacState(Eigen::MatrixXd& F, const mtState& state, bool &itered) const = 0;
+  virtual void jacState(Eigen::MatrixXd& F, const mtState& state) const = 0;
   virtual void jacNoise(Eigen::MatrixXd& F, const mtState& state) const = 0;
   virtual void preProcess(mtFilterState& filterState, const mtMeas& meas, bool& isFinished){
     isFinished = false;
@@ -210,15 +209,14 @@ class Update: public ModelBase<Update<Innovation,FilterState,Meas,Noise,OutlierD
   }
   int performUpdateEKF(mtFilterState& filterState, const mtMeas& meas){
     meas_ = meas;
-    bool itered = false;
     if(!useSpecialLinearizationPoint_){
-      this->jacState(H_,filterState.state_, itered);
+      this->jacState(H_,filterState.state_);
       Hlin_ = H_;
       this->jacNoise(Hn_,filterState.state_);
       this->evalInnovationShort(y_,filterState.state_);
     } else {
       filterState.state_.boxPlus(filterState.difVecLin_,linState_);
-      this->jacState(H_,linState_, itered);
+      this->jacState(H_,linState_);
       if(useImprovedJacobian_){
         filterState.state_.boxMinusJac(linState_,boxMinusJac_);
         Hlin_ = H_*boxMinusJac_;
@@ -270,20 +268,18 @@ class Update: public ModelBase<Update<Innovation,FilterState,Meas,Noise,OutlierD
     MXD bestCov;
 
     int zeros = 0;
-    bool itered = false;
     while(generateCandidates(filterState,linState_, zeros)){
       cancelIteration_ = false;
       hasConverged_ = false;
       for(iterationNum_=0;iterationNum_<maxNumIteration_ && !hasConverged_ && !cancelIteration_;iterationNum_++){
-        this->jacState(H_,linState_, itered);
+        this->jacState(H_,linState_);
         this->jacNoise(Hn_,linState_);
         this->evalInnovationShort(y_,linState_);
-        itered = true;
         if(isCoupled){
           C_ = filterState.G_*preupdnoiP_*Hn_.transpose();
           Py_ = H_*filterState.cov_*H_.transpose() + Hn_*updnoiP_*Hn_.transpose() + H_*C_ + C_.transpose()*H_.transpose();
         } else {
-          Py_ = H_.template block<2,2>(0,zeros)*filterState.cov_.template block<2,2>(zeros, zeros)*H_.template block<2,2>(0,zeros).transpose() + updnoiP_;
+          Py_ = H_.block(2,2,0,zeros)*filterState.cov_.block(2,2,zeros, zeros)*H_.block(2,2, 0,zeros).transpose() + updnoiP_;
         }
         y_.boxMinus(yIdentity_,innVector_);
 
@@ -296,8 +292,8 @@ class Update: public ModelBase<Update<Innovation,FilterState,Meas,Noise,OutlierD
         if(isCoupled){
           K_ = (filterState.cov_*H_.transpose()+C_)*Pyinv_;
         } else {
-          const int cov_rows = 21 + 3*ROVIO_NMAXFEATURE;
-          K_ = filterState.cov_.template block<cov_rows, 2>(0, zeros)*(H_.template block<2,2>(0,zeros).transpose()*Pyinv_);
+          const int cov_rows = 21 + 3*ROVTIO_NMAXFEATURE;
+          K_ = filterState.cov_.block(0, zeros, cov_rows, 2)*(H_.block(0, zeros, 2, 2).transpose()*Pyinv_);
         }
 
         #ifdef CHECK_UPDATE_MATRICES
@@ -316,7 +312,7 @@ class Update: public ModelBase<Update<Innovation,FilterState,Meas,Noise,OutlierD
           }
       #endif
         filterState.state_.boxMinus(linState_,difVecLinInv_);
-        updateVec_ = -K_*(innVector_+H_.template block(0,zeros,2,2)*difVecLinInv_.template block<2,1>(zeros, 0))+difVecLinInv_; // includes correction for offseted linearization point, dif must be recomputed (a-b != (-(b-a)))
+        updateVec_ = -K_*(innVector_+H_.block(0,zeros,2,2)*difVecLinInv_.block(2, 1, zeros, 0))+difVecLinInv_; // includes correction for offseted linearization point, dif must be recomputed (a-b != (-(b-a)))
         linState_.boxPlus(updateVec_,linState_);
         updateVecNorm_ = updateVec_.norm();
         hasConverged_ = updateVecNorm_<=updateVecNormTermination_;

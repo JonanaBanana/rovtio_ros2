@@ -177,40 +177,40 @@ class Prediction: public ModelBase<Prediction<FilterState>,typename FilterState:
       this->evalPredictionShort(filterState.state_,filterState.state_,std::min(itMeas->first,tTarget)-filterState.t_);
       filterState.t_ = std::min(itMeas->first,tTarget);
     }
-    const int G_rows = 21 + 3* ROVIO_NMAXFEATURE;
-    const int featRows = 3 * ROVIO_NMAXFEATURE;
-    GprenoiP_G = filterState.G_.template block<G_rows,3>(0,12)*prenoiP_.template block<3,3>(12,12)*(filterState.G_.template block<G_rows,3>(0,12)).transpose();
-    GprenoiP_G.template block<12,12>(0,0).diagonal() += (filterState.G_.template block<12,12>(0,0).diagonal().cwiseProduct(prenoiP_.template block<12,12>(0,0).diagonal())).cwiseProduct(filterState.G_.template block<12,12>(0,0).diagonal());
-    GprenoiP_G.template block<6,6>(15,15).diagonal() += (filterState.G_.template block<6,6>(15,15).diagonal().cwiseProduct(prenoiP_.template block<6,6>(15,15).diagonal())).cwiseProduct(filterState.G_.template block<6,6>(15,15).diagonal());
-    for (int i=0; i<ROVIO_NMAXFEATURE; i++)
+    const int G_rows = 21 + 3* ROVTIO_NMAXFEATURE;
+    const int featRows = 3 * ROVTIO_NMAXFEATURE;
+    GprenoiP_G = filterState.G_.block(G_rows, 3, 0,12)*prenoiP_.block(3, 3, 12,12)*(filterState.G_.block(G_rows, 3, 0,12)).transpose();
+    GprenoiP_G.block(12, 12, 0,0).diagonal() += (filterState.G_.block(12, 12, 0,0).diagonal().cwiseProduct(prenoiP_.block(12, 12, 0,0).diagonal())).cwiseProduct(filterState.G_.block(12, 12, 0,0).diagonal());
+    GprenoiP_G.block(6, 6, 15,15).diagonal() += (filterState.G_.block(6, 6, 15,15).diagonal().cwiseProduct(prenoiP_.block(6, 6, 15,15).diagonal())).cwiseProduct(filterState.G_.block(6, 6, 15,15).diagonal());
+    for (int i=0; i<ROVTIO_NMAXFEATURE; i++)
     {
-      GprenoiP_G.template block<3,3>(21+3*i,21+3*i) += filterState.G_.template block<3,3>(21+3*i, 21+3*i) * prenoiP_.template block<3,3>(21+3*i, 21+3*i) * filterState.G_.template block<3,3>(21+3*i, 21+3*i).transpose();
+      GprenoiP_G.block(3, 3, 21+3*i,21+3*i) += filterState.G_.block(3, 3, 21+3*i, 21+3*i) * prenoiP_.block(3, 3, 21+3*i, 21+3*i) * filterState.G_.block(3, 3, 21+3*i, 21+3*i).transpose();
     }
-    Fcov.template block<6,G_rows>(0,0) = filterState.F_.template block<6,12>(0, 3) * filterState.cov_.template block(3, 0, 12, G_rows);
+    Fcov.block(6, G_rows, 0,0) = filterState.F_.block(6, 12, 0, 3) * filterState.cov_.block(3, 0, 12, G_rows);
 
-    Fcov.template block<3,G_rows>(0,0) += filterState.cov_.template block<3,G_rows>(0, 0);
-    Fcov.template block<15,G_rows>(6,0) = filterState.cov_.template block<15,G_rows>(6, 0);
-    Fcov.template block<3,G_rows>(12,0) += filterState.F_.template block<3,3>(12, 9) * filterState.cov_.template block<3,G_rows>(9,0);
-    Fcov.template block<featRows,G_rows>(21,0) = filterState.F_.template block<featRows,3>(21, 3) * filterState.cov_.template block<3,G_rows>(3,0);
-    Fcov.template block<featRows,G_rows>(21,0) += filterState.F_.template block<featRows,3>(21, 9) * filterState.cov_.template block<3,G_rows>(9,0);
-    Fcov.template block<featRows,G_rows>(21,0) += filterState.F_.template block<featRows,6>(21, 15) * filterState.cov_.template block<6,G_rows>(15,0);
-    for (int i=0; i<ROVIO_NMAXFEATURE; i++)
+    Fcov.block(3, G_rows, 0, 0) += filterState.cov_.block(3, G_rows, 0, 0);
+    Fcov.block(15, G_rows, 6, 0) = filterState.cov_.block(15, G_rows, 6, 0);
+    Fcov.block(3, G_rows, 12, 0) += filterState.F_.block(3, 3, 12, 9) * filterState.cov_.block(3, G_rows, 9, 0);
+    Fcov.block(featRows, G_rows, 21, 0) = filterState.F_.block(featRows, 3, 21, 3) * filterState.cov_.block(3, G_rows, 3, 0);
+    Fcov.block(featRows, G_rows, 21, 0) += filterState.F_.block(featRows, 3, 21, 9) * filterState.cov_.block(3, G_rows, 9, 0);
+    Fcov.block(featRows, G_rows, 21, 0) += filterState.F_.block(featRows, 6, 21, 15) * filterState.cov_.block(6, G_rows, 15, 0);
+    for (int i=0; i<ROVTIO_NMAXFEATURE; i++)
     {
-      Fcov.template block<3,G_rows>(21+3*i,0) += filterState.F_.template block<3,3>(21+3*i, 21+3*i) * filterState.cov_.template block<3,G_rows>(21+3*i, 0);
+      Fcov.block(3, G_rows, 21+3*i,0) += filterState.F_.block(3, 3, 21+3*i, 21+3*i) * filterState.cov_.block(3, G_rows, 21+3*i, 0);
     }
 
     // // calc Fcov * F
-    FcovF.template block<G_rows,6>(0,0) =  Fcov.template block<G_rows,15>(0,0) * filterState.F_.template block<6,15>(0, 0).transpose();
-    FcovF.template block<G_rows,15>(0,6) = Fcov.template block<G_rows,15>(0, 6);
-    FcovF.template block<G_rows,3>(0,12) +=  Fcov.template block<G_rows,3>(0,9) * filterState.F_.template block<3,3>(12,9).transpose();
-    FcovF.template block<G_rows,featRows>(0,21) =  Fcov.template block<G_rows,3>(0,3) * filterState.F_.template block<featRows,3>(21,3).transpose();
-    FcovF.template block<G_rows,featRows>(0,21) +=  Fcov.template block<G_rows,3>(0,9) * filterState.F_.template block<featRows,3>(21,9).transpose();
-    FcovF.template block<G_rows,featRows>(0,21) +=  Fcov.template block<G_rows,6>(0,15) * filterState.F_.template block<featRows,6>(21,15).transpose();
+    FcovF.block(G_rows, 6, 0, 0) =  Fcov.block(G_rows, 15, 0, 0) * filterState.F_.block(6, 15, 0, 0).transpose();
+    FcovF.block(G_rows, 15, 0, 6) = Fcov.block(G_rows, 15, 0, 6);
+    FcovF.block(G_rows, 3, 0, 12) +=  Fcov.block(G_rows, 3, 0, 9) * filterState.F_.block(3, 3, 12,9).transpose();
+    FcovF.block(G_rows, featRows, 0, 21) =  Fcov.block(G_rows, 3, 0, 3) * filterState.F_.block(featRows, 3, 21, 3).transpose();
+    FcovF.block(G_rows, featRows, 0, 21) +=  Fcov.block(G_rows, 3, 0, 9) * filterState.F_.block(featRows, 3, 21, 9).transpose();
+    FcovF.block(G_rows, featRows, 0, 21) +=  Fcov.block(G_rows, 6, 0, 15) * filterState.F_.block(featRows, 6, 21, 15).transpose();
 
 
-    for (int i=0; i<ROVIO_NMAXFEATURE; i++)
+    for (int i=0; i<ROVTIO_NMAXFEATURE; i++)
     {
-      FcovF.template block<G_rows,3>(0, 21+3*i) += Fcov.template block<G_rows,3>(0, 21+3*i) * filterState.F_.template block<3,3>(21+3*i, 21+3*i).transpose();
+      FcovF.block(G_rows, 3, 0, 21+3*i) += Fcov.block(G_rows, 3, 0, 21+3*i) * filterState.F_.block(3, 3, 21+3*i, 21+3*i).transpose();
     }
 
     #ifdef CHECK_COV_PREDICTION_MATRICES

@@ -182,7 +182,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     doubleRegister_.registerScalar("timeOffset",timeOffset_);
     boolRegister_.registerScalar("enablePosition",enablePosition_);
     boolRegister_.registerScalar("enableAttitude",enableAttitude_);
-    boolRegister_.registerScalar("noFeedbackToRovio",noFeedbackToRovio_);
+    boolRegister_.registerScalar("noFeedbackToRovtio",noFeedbackToRovtio_);
     boolRegister_.registerScalar("doInertialAlignmentAtStart",doInertialAlignmentAtStart_);
     boolRegister_.registerScalar("useOdometryCov",useOdometryCov_);
 

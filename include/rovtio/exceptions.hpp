@@ -65,7 +65,7 @@ namespace rovtio {
 }
 
 /* Usage:
- * ROVTIO_THROW(rovio::CameraNullPtrException);
+ * ROVTIO_THROW(rovtio::CameraNullPtrException);
  */
 
 #endif /* ROVTIO_EXCEPTION_HPP_ */

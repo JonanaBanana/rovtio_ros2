@@ -398,7 +398,7 @@ class ArrayElement: public ElementBase<ArrayElement<Element,M>,typename Element:
   template<bool b = (D_>0), typename std::enable_if<b>::type* = nullptr>
   void boxPlus_(const mtDifVec& vecIn, ArrayElement& stateOut) const{
     for(unsigned int i=0; i<M_;i++){
-      array_[i].boxPlus(vecIn.template block<Element::D_,1>(Element::D_*i,0),stateOut.array_[i]);
+      array_[i].boxPlus(vecIn.block(Element::D_, 1, Element::D_*i, 0),stateOut.array_[i]);
     }
   }
   template<bool b = (D_>0), typename std::enable_if<!b>::type* = nullptr>
@@ -411,7 +411,7 @@ class ArrayElement: public ElementBase<ArrayElement<Element,M>,typename Element:
     typename Element::mtDifVec difVec;
     for(unsigned int i=0; i<M_;i++){
       array_[i].boxMinus(stateIn.array_[i],difVec);
-      vecOut.template block<Element::D_,1>(Element::D_*i,0) = difVec;
+      vecOut.block(Element::D_, 1, Element::D_*i, 0) = difVec;
     }
   }
   template<bool b = (D_>0), typename std::enable_if<!b>::type* = nullptr>
@@ -424,7 +424,7 @@ class ArrayElement: public ElementBase<ArrayElement<Element,M>,typename Element:
     matOut.setZero();
     for(unsigned int i=0; i<M_;i++){
       array_[i].boxMinusJac(stateIn.array_[i],boxMinusJacMat_);
-      matOut.template block<Element::D_,Element::D_>(Element::D_*i,Element::D_*i) = boxMinusJacMat_;
+      matOut.block(Element::D_, Element::D_, Element::D_*i, Element::D_*i) = boxMinusJacMat_;
     }
   }
   template<bool b = (D_>0), typename std::enable_if<!b>::type* = nullptr>
@@ -523,7 +523,7 @@ class State{
   template<unsigned int i=0,unsigned int j=0,typename std::enable_if<(i<E_)>::type* = nullptr>
   inline void boxPlus_(const mtDifVec& vecIn, State<Elements...>& stateOut) const{
     if(std::tuple_element<i,decltype(mElements_)>::type::D_>0){
-      std::get<i>(mElements_).boxPlus(vecIn.template block<std::tuple_element<i,decltype(mElements_)>::type::D_,1>(j,0),std::get<i>(stateOut.mElements_));
+      std::get<i>(mElements_).boxPlus(vecIn.block(std::tuple_element<i,decltype(mElements_)>::type::D_, 1, j, 0),std::get<i>(stateOut.mElements_));
     } else { // Required for auxiliary states
       Eigen::Matrix<double,std::tuple_element<i,decltype(mElements_)>::type::D_,1> dummyVec;
       std::get<i>(mElements_).boxPlus(dummyVec,std::get<i>(stateOut.mElements_));
@@ -540,7 +540,7 @@ class State{
     if(std::tuple_element<i,decltype(mElements_)>::type::D_>0){
       typename std::tuple_element<i,decltype(mElements_)>::type::mtDifVec difVec;
       std::get<i>(mElements_).boxMinus(std::get<i>(stateIn.mElements_),difVec);
-      vecOut.template block<std::tuple_element<i,decltype(mElements_)>::type::D_,1>(j,0) = difVec;
+      vecOut.block(std::tuple_element<i,decltype(mElements_)>::type::D_, 1, j, 0) = difVec;
     }
     boxMinus_<i+1,j+std::tuple_element<i,decltype(mElements_)>::type::D_>(stateIn,vecOut);
   }
@@ -555,7 +555,7 @@ class State{
     if(std::tuple_element<i,decltype(mElements_)>::type::D_>0){
       MXD mat((int)std::tuple_element<i,decltype(mElements_)>::type::D_,(int)std::tuple_element<i,decltype(mElements_)>::type::D_);
       std::get<i>(mElements_).boxMinusJac(std::get<i>(stateIn.mElements_),mat);
-      matOut.template block<std::tuple_element<i,decltype(mElements_)>::type::D_,std::tuple_element<i,decltype(mElements_)>::type::D_>(j,j) = mat;
+      matOut.block(std::tuple_element<i,decltype(mElements_)>::type::D_, std::tuple_element<i,decltype(mElements_)>::type::D_, j, j) = mat;
     }
     boxMinusJac_<i+1,j+std::tuple_element<i,decltype(mElements_)>::type::D_>(stateIn,matOut);
   }

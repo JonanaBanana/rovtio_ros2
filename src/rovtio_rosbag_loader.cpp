@@ -278,17 +278,17 @@ int main(int argc, char** argv){
     if(serializedMsg->topic_name == imu_topic_name){
       sensor_msgs::msg::Imu imuMsg = deserializeMessage<sensor_msgs::msg::Imu>(serializedMsg);
       sensor_msgs::msg::Imu::ConstPtr imuMsgPtr = std::make_shared<sensor_msgs::msg::Imu>(imuMsg);
-      if (imuMsgPtr != NULL) rovtioNode->imuCallback(imuMsgPtr);
+      if (imuMsgPtr != NULL) rovtioNode->imuCallback(std::const_pointer_cast<sensor_msgs::msg::Imu>(imuMsgPtr));
     }
     if(serializedMsg->topic_name == cam0_topic_name){
       sensor_msgs::msg::Image imgMsg =  deserializeMessage<sensor_msgs::msg::Image>(serializedMsg);
       sensor_msgs::msg::Image::ConstPtr imgMsgPtr = std::make_shared<sensor_msgs::msg::Image>(imgMsg);
-      if (imgMsgPtr != NULL) rovtioNode->imgCallback0(imgMsgPtr);
+      if (imgMsgPtr != NULL) rovtioNode->imgCallback(std::const_pointer_cast<sensor_msgs::msg::Image>(imgMsgPtr), 0);
     }
     if(serializedMsg->topic_name == cam1_topic_name){
       sensor_msgs::msg::Image imgMsg2 = deserializeMessage<sensor_msgs::msg::Image>(serializedMsg);
       sensor_msgs::msg::Image::ConstPtr imgMsg2Ptr = std::make_shared<sensor_msgs::msg::Image>(imgMsg2);
-      if (imgMsg2Ptr != NULL) rovtioNode->imgCallback1(imgMsg2Ptr);
+      if (imgMsg2Ptr != NULL) rovtioNode->imgCallback(std::const_pointer_cast<sensor_msgs::msg::Image>(imgMsg2Ptr), 1);
     }
 	if(serializedMsg->topic_name == gt_topic_name) {
 		geometry_msgs::msg::PointStamped gtPose = deserializeMessage<geometry_msgs::msg::PointStamped>(serializedMsg);
@@ -299,13 +299,13 @@ int main(int argc, char** argv){
     rclcpp::spin_some(rovtioNode);
 
     if(rovtioNode->gotFirstMessages_){
-      static double lastSafeTime = rovioNode->mpFilter_->safe_.t_;
+      static double lastSafeTime = rovtioNode->mpFilter_->safe_.t_;
       if(rovtioNode->mpFilter_->safe_.t_ > lastSafeTime){
         if(rovtioNode->forceOdometryPublishing_)
         {
           bagOut.write(rovtioNode->odometryMsg_, odometry_topic_name, rovtioNode->get_clock()->now());
         }
-        //if(rovtioNode->forceTransformPublishing_) bagOut.write(transform_topic_name,rovtioNode->get_clock()->now(),rovioNode->transformMsg_);
+        //if(rovtioNode->forceTransformPublishing_) bagOut.write(transform_topic_name,rovtioNode->get_clock()->now(),rovtioNode->transformMsg_);
         for(int camID=0;camID<mtFilter::mtState::nCam_;camID++)
         {
           if(rovtioNode->forceExtrinsicsPublishing_) {

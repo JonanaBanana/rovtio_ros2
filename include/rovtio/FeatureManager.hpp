@@ -246,8 +246,8 @@ class FeatureSetManager{
     return averageScore;
   }
 
-  static bool isFirstMPBetter(MultilevelPatch<nLevels,patchSize>& mp1, MultilevelPatch<nLevels,patchSize>&mp2){
-    return mp1.s_ > mp2.s_;
+  static bool isFirstMPBetter(const std::tuple<const FeatureCoordinates*,MultilevelPatch<nLevels,patchSize>,int>& mp1, const std::tuple<const FeatureCoordinates*,MultilevelPatch<nLevels,patchSize>,int>&mp2){
+    return std::get<1>(mp1).s_ > std::get<1>(mp2).s_;
   }
 
   /** \brief Calculates the shi tomashi scores for the candidates
@@ -433,9 +433,19 @@ class FeatureSetManager{
   }
 
 
-  std::unordered_set<unsigned int> addBestCandidatesNew(const std::vector<FeatureCoordinates>& candidates, const ImagePyramid<nLevels>& pyr, const int camID, const double initTime,
-                                                       const int l1, const int l2, const int maxAddedFeature, const int nDetectionBuckets, const double scoreDetectionExponent,
-                                                       const double penaltyDistance, const double zeroDistancePenalty, const bool requireMax, const float minScore){
+  std::unordered_set<unsigned int> addBestCandidatesNew(const FeatureCoordinatesVec& candidates,
+                                                        const ImagePyramid<nLevels>& pyr,
+                                                        const int camID,
+                                                        const double initTime,
+                                                        const int l1, 
+                                                        const int l2, 
+                                                        const int maxAddedFeature, 
+                                                        const int nDetectionBuckets, 
+                                                        const double scoreDetectionExponent,
+                                                        const double penaltyDistance, 
+                                                        const double zeroDistancePenalty, 
+                                                        const bool requireMax, 
+                                                        const float minScore){
       std::unordered_set<unsigned int> newFeatureIDs;
       std::list<std::tuple<const FeatureCoordinates*,MultilevelPatch<nLevels,patchSize>,int>> multilevelPatches;
 

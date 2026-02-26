@@ -151,7 +151,7 @@ ZeroVelocityUpdateNoise<typename FILTERSTATE::mtState>,ZeroVelocityOutlierDetect
    *  @param state - Filter state.
    *  @param itered - if one iteration of IEKF is complete
    */
-  void jacState(MXD& F, const mtState& state, bool &itered) const{
+  void jacState(MXD& F, const mtState& state) const{
     F.setZero();
     F.template block<3,3>(mtInnovation::template getId<mtInnovation::_vel>(),mtState::template getId<mtState::_vel>()) = Eigen::Matrix3d::Identity();
   }

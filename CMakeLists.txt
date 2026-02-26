@@ -50,7 +50,7 @@ find_package(image_transport REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YamlCpp REQUIRED yaml-cpp>=0.5)
 
-find_package(rovtio_interfaces REQUIRED)
+find_package(rovtio_interfaces_ros2 REQUIRED)
 ament_export_dependencies(rosidl_default_runtime)
 
 # --- Includes ---
@@ -86,7 +86,7 @@ ament_target_dependencies(${PROJECT_NAME}_lib
 		visualization_msgs
 		rosbag2_cpp
 		rosbag2_storage
-		rovtio_interfaces
+		rovtio_interfaces_ros2
 		image_transport
 )
 target_link_libraries(${PROJECT_NAME}_lib
@@ -97,15 +97,15 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 # --- Executables ---
 add_executable(rovtio_node src/rovtio_node.cpp)
-ament_target_dependencies(rovtio_node rclcpp rovtio_interfaces)
+ament_target_dependencies(rovtio_node rclcpp rovtio_interfaces_ros2)
 target_link_libraries(rovtio_node ${PROJECT_NAME}_lib)
 
 add_executable(rovtio_rosbag_loader src/rovtio_rosbag_loader.cpp)
-ament_target_dependencies(rovtio_rosbag_loader rclcpp)
+ament_target_dependencies(rovtio_rosbag_loader rclcpp rovtio_interfaces_ros2)
 target_link_libraries(rovtio_rosbag_loader ${PROJECT_NAME}_lib)
 
 add_executable(feature_tracker_node src/feature_tracker_node.cpp)
-ament_target_dependencies(feature_tracker_node rclcpp)
+ament_target_dependencies(feature_tracker_node rclcpp rovtio_interfaces_ros2)
 target_link_libraries(feature_tracker_node ${PROJECT_NAME}_lib)
 
 # --- Install ---

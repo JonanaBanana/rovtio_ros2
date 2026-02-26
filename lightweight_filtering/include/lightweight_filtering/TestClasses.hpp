@@ -111,15 +111,15 @@ class UpdateExample: public LWF::Update<Innovation,FilterState,UpdateMeas,Update
   void jacState(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = MPD(state.get<State::ATT>()).matrix();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtState::getId<State::ATT>()) = -gSM(state.get<State::ATT>().rotate(state.get<State::POS>()));
-    J.template block<3,3>(mtInnovation::getId<Innovation::ATT>(),mtState::getId<State::ATT>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = MPD(state.get<State::ATT>()).matrix();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtState::getId<State::ATT>()) = -gSM(state.get<State::ATT>().rotate(state.get<State::POS>()));
+    J.block(3, 3, mtInnovation::getId<Innovation::ATT>(),mtState::getId<State::ATT>()) = M3D::Identity();
   }
   void jacNoise(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
-    J.template block<3,3>(mtInnovation::getId<Innovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity();
   }
 };
 
@@ -148,29 +148,29 @@ class PredictionExample: public LWF::Prediction<FilterState>{
     V3D g_(0,0,-9.81);
     V3D dOmega = dt*(meas_.get<PredictionMeas::GYR>()-state.get<State::GYB>());
     J.setZero();
-    J.template block<3,3>(mtState::getId<State::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
-    J.template block<3,3>(mtState::getId<State::POS>(),mtState::getId<State::VEL>()) = dt*MPD(state.get<State::ATT>()).matrix();
-    J.template block<3,3>(mtState::getId<State::POS>(),mtState::getId<State::ATT>()) = -dt*gSM(V3D(state.get<State::ATT>().rotate(state.get<State::VEL>())));
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtState::getId<State::VEL>()) = (M3D::Identity()-gSM(dOmega));
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtState::getId<State::ACB>()) = -dt*M3D::Identity();
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtState::getId<State::GYB>()) = -dt*gSM(state.get<State::VEL>());
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtState::getId<State::ATT>()) = dt*MPD(state.get<State::ATT>()).matrix().transpose()*gSM(g_);
-    J.template block<3,3>(mtState::getId<State::ACB>(),mtState::getId<State::ACB>()) = M3D::Identity();
-    J.template block<3,3>(mtState::getId<State::GYB>(),mtState::getId<State::GYB>()) = M3D::Identity();
-    J.template block<3,3>(mtState::getId<State::ATT>(),mtState::getId<State::GYB>()) = -dt*MPD(state.get<State::ATT>()).matrix()*Lmat(dOmega);
-    J.template block<3,3>(mtState::getId<State::ATT>(),mtState::getId<State::ATT>()) = M3D::Identity();
+    J.block(3, 3, mtState::getId<State::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
+    J.block(3, 3, mtState::getId<State::POS>(),mtState::getId<State::VEL>()) = dt*MPD(state.get<State::ATT>()).matrix();
+    J.block(3, 3, mtState::getId<State::POS>(),mtState::getId<State::ATT>()) = -dt*gSM(V3D(state.get<State::ATT>().rotate(state.get<State::VEL>())));
+    J.block(3, 3, mtState::getId<State::VEL>(),mtState::getId<State::VEL>()) = (M3D::Identity()-gSM(dOmega));
+    J.block(3, 3, mtState::getId<State::VEL>(),mtState::getId<State::ACB>()) = -dt*M3D::Identity();
+    J.block(3, 3, mtState::getId<State::VEL>(),mtState::getId<State::GYB>()) = -dt*gSM(state.get<State::VEL>());
+    J.block(3, 3, mtState::getId<State::VEL>(),mtState::getId<State::ATT>()) = dt*MPD(state.get<State::ATT>()).matrix().transpose()*gSM(g_);
+    J.block(3, 3, mtState::getId<State::ACB>(),mtState::getId<State::ACB>()) = M3D::Identity();
+    J.block(3, 3, mtState::getId<State::GYB>(),mtState::getId<State::GYB>()) = M3D::Identity();
+    J.block(3, 3, mtState::getId<State::ATT>(),mtState::getId<State::GYB>()) = -dt*MPD(state.get<State::ATT>()).matrix()*Lmat(dOmega);
+    J.block(3, 3, mtState::getId<State::ATT>(),mtState::getId<State::ATT>()) = M3D::Identity();
   }
   void jacNoise(Eigen::MatrixXd& J, const mtState& state, double dt) const{
     mtNoise noise;
     V3D g_(0,0,-9.81);
     V3D dOmega = dt*(meas_.get<PredictionMeas::GYR>()-state.get<State::GYB>());
     J.setZero();
-    J.template block<3,3>(mtState::getId<State::POS>(),mtNoise::getId<mtNoise::POS>()) = MPD(state.get<State::ATT>()).matrix()*sqrt(dt);
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtNoise::getId<mtNoise::VEL>()) = -M3D::Identity()*sqrt(dt);
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtNoise::getId<mtNoise::ATT>()) = -gSM(state.get<State::VEL>())*sqrt(dt);
-    J.template block<3,3>(mtState::getId<State::ACB>(),mtNoise::getId<mtNoise::ACB>()) = M3D::Identity()*sqrt(dt);
-    J.template block<3,3>(mtState::getId<State::GYB>(),mtNoise::getId<mtNoise::GYB>()) = M3D::Identity()*sqrt(dt);
-    J.template block<3,3>(mtState::getId<State::ATT>(),mtNoise::getId<mtNoise::ATT>()) = -MPD(state.get<State::ATT>()).matrix()*Lmat(dOmega)*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::POS>(),mtNoise::getId<mtNoise::POS>()) = MPD(state.get<State::ATT>()).matrix()*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::VEL>(),mtNoise::getId<mtNoise::VEL>()) = -M3D::Identity()*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::VEL>(),mtNoise::getId<mtNoise::ATT>()) = -gSM(state.get<State::VEL>())*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::ACB>(),mtNoise::getId<mtNoise::ACB>()) = M3D::Identity()*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::GYB>(),mtNoise::getId<mtNoise::GYB>()) = M3D::Identity()*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::ATT>(),mtNoise::getId<mtNoise::ATT>()) = -MPD(state.get<State::ATT>()).matrix()*Lmat(dOmega)*sqrt(dt);
   }
 };
 
@@ -191,15 +191,15 @@ class PredictAndUpdateExample: public LWF::Update<Innovation,FilterState,UpdateM
   void jacState(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = MPD(state.get<State::ATT>()).matrix();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtState::getId<State::ATT>()) = -gSM(state.get<State::ATT>().rotate(state.get<State::POS>()));
-    J.template block<3,3>(mtInnovation::getId<Innovation::ATT>(),mtState::getId<State::ATT>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = MPD(state.get<State::ATT>()).matrix();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtState::getId<State::ATT>()) = -gSM(state.get<State::ATT>().rotate(state.get<State::POS>()));
+    J.block(3, 3, mtInnovation::getId<Innovation::ATT>(),mtState::getId<State::ATT>()) = M3D::Identity();
   }
   void jacNoise(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
-    J.template block<3,3>(mtInnovation::getId<Innovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity();
   }
 };
 
@@ -244,35 +244,35 @@ class GIFPredictionExample: public LWF::GIFPrediction<FilterState,GIFInnovation,
   void jacPreviousState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
     V3D dOmega = -dt*(meas_.get<PredictionMeas::GYR>()-previousState.get<State::GYB>());
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::VEL>()) = -MPD(previousState.get<State::ATT>()).matrix();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::ATT>()) = gSM(V3D(previousState.get<State::ATT>().rotate(V3D(previousState.get<State::VEL>()))));
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -(M3D::Identity()+gSM(dOmega))/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ACB>()) = M3D::Identity();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::GYB>()) = gSM(previousState.get<State::VEL>());
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ATT>()) = -MPD(previousState.get<State::ATT>()).matrix().transpose()*gSM(g_);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::GYB>()) = M3D::Identity();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = -Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::VEL>()) = -MPD(previousState.get<State::ATT>()).matrix();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::ATT>()) = gSM(V3D(previousState.get<State::ATT>().rotate(V3D(previousState.get<State::VEL>()))));
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -(M3D::Identity()+gSM(dOmega))/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ACB>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::GYB>()) = gSM(previousState.get<State::VEL>());
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ATT>()) = -MPD(previousState.get<State::ATT>()).matrix().transpose()*gSM(g_);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::GYB>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = -Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
   }
   void jacCurrentState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
   }
   void jacNoise(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
     V3D dOmega = -dt*(meas_.get<PredictionMeas::GYR>()-previousState.get<State::GYB>());
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtNoise::getId<mtNoise::POS>()) = -MPD(previousState.get<State::ATT>()).matrix()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::ATT>()) = gSM(previousState.get<State::VEL>())/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACB>(),mtNoise::getId<mtNoise::ACB>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::GYB>(),mtNoise::getId<mtNoise::GYB>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtNoise::getId<mtNoise::POS>()) = -MPD(previousState.get<State::ATT>()).matrix()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::ATT>()) = gSM(previousState.get<State::VEL>())/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACB>(),mtNoise::getId<mtNoise::ACB>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::GYB>(),mtNoise::getId<mtNoise::GYB>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity()/sqrt(dt);
   }
   void getLinearizationPoint(mtState& currentState, const mtFilterState& filterState, const mtMeas& meas, double dt){
     V3D dOmega = dt*(meas_.get<PredictionMeas::GYR>()-filterState.state_.get<State::GYB>());
@@ -359,40 +359,40 @@ class GIFPredictionExampleWithUpdate: public LWF::GIFPrediction<FilterState,GIFI
   void jacPreviousState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
     V3D dOmega = -dt*(meas_.get<PredictionMeas::GYR>()-previousState.get<State::GYB>());
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::VEL>()) = -MPD(previousState.get<State::ATT>()).matrix();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::ATT>()) = gSM(V3D(previousState.get<State::ATT>().rotate(V3D(previousState.get<State::VEL>()))));
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -(M3D::Identity()+gSM(dOmega))/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ACB>()) = M3D::Identity();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::GYB>()) = gSM(previousState.get<State::VEL>());
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ATT>()) = -MPD(previousState.get<State::ATT>()).matrix().transpose()*gSM(g_);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::GYB>()) = M3D::Identity();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = -Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::VEL>()) = -MPD(previousState.get<State::ATT>()).matrix();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::ATT>()) = gSM(V3D(previousState.get<State::ATT>().rotate(V3D(previousState.get<State::VEL>()))));
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -(M3D::Identity()+gSM(dOmega))/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ACB>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::GYB>()) = gSM(previousState.get<State::VEL>());
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::ATT>()) = -MPD(previousState.get<State::ATT>()).matrix().transpose()*gSM(g_);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::GYB>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = -Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
   }
   void jacCurrentState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POSU>(),mtState::getId<State::POS>()) = MPD(currentState.get<State::ATT>()).matrix();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POSU>(),mtState::getId<State::ATT>()) = -gSM(currentState.get<State::ATT>().rotate(currentState.get<State::POS>()));
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATTU>(),mtState::getId<State::ATT>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACB>(),mtState::getId<State::ACB>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::GYB>(),mtState::getId<State::GYB>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtState::getId<State::ATT>()) = Lmat((previousState.get<State::ATT>().inverted()*currentState.get<State::ATT>()).logarithmicMap()).inverse()*MPD(previousState.get<State::ATT>().inverted()).matrix()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POSU>(),mtState::getId<State::POS>()) = MPD(currentState.get<State::ATT>()).matrix();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POSU>(),mtState::getId<State::ATT>()) = -gSM(currentState.get<State::ATT>().rotate(currentState.get<State::POS>()));
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATTU>(),mtState::getId<State::ATT>()) = M3D::Identity();
   }
   void jacNoise(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
     V3D dOmega = -dt*(meas_.get<PredictionMeas::GYR>()-previousState.get<State::GYB>());
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtNoise::getId<mtNoise::POS>()) = -MPD(previousState.get<State::ATT>()).matrix()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::ATT>()) = gSM(previousState.get<State::VEL>())/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACB>(),mtNoise::getId<mtNoise::ACB>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::GYB>(),mtNoise::getId<mtNoise::GYB>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POSU>(),mtNoise::getId<mtNoise::POSU>()) = M3D::Identity();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ATTU>(),mtNoise::getId<mtNoise::ATTU>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtNoise::getId<mtNoise::POS>()) = -MPD(previousState.get<State::ATT>()).matrix()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::ATT>()) = gSM(previousState.get<State::VEL>())/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACB>(),mtNoise::getId<mtNoise::ACB>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::GYB>(),mtNoise::getId<mtNoise::GYB>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATT>(),mtNoise::getId<mtNoise::ATT>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POSU>(),mtNoise::getId<mtNoise::POSU>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ATTU>(),mtNoise::getId<mtNoise::ATTU>()) = M3D::Identity();
   }
   void getLinearizationPoint(mtState& currentState, const mtFilterState& filterState, const mtMeas& meas, double dt){
     V3D dOmega = dt*(meas_.get<PredictionMeas::GYR>()-filterState.state_.get<State::GYB>());
@@ -492,13 +492,13 @@ class UpdateExample: public LWF::Update<Innovation,FilterState,UpdateMeas,Update
   void jacState(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
-    J.template block<1,3>(mtInnovation::getId<Innovation::HEI>(),mtState::getId<State::POS>()) = V3D(0,0,1).transpose();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
+    J.block(1, 3, mtInnovation::getId<Innovation::HEI>(),mtState::getId<State::POS>()) = V3D(0,0,1).transpose();
   }
   void jacNoise(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
     J(mtInnovation::getId<Innovation::HEI>(),mtNoise::getId<mtNoise::HEI>()) = 1.0;
   }
 };
@@ -518,14 +518,14 @@ class PredictionExample: public LWF::Prediction<FilterState>{
   }
   void jacPreviousState(Eigen::MatrixXd& J, const mtState& state, double dt) const{
     J.setZero();
-    J.template block<3,3>(mtState::getId<State::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
-    J.template block<3,3>(mtState::getId<State::POS>(),mtState::getId<State::VEL>()) = dt*M3D::Identity();
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtState::getId<State::VEL>()) = M3D::Identity();
+    J.block(3, 3, mtState::getId<State::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
+    J.block(3, 3, mtState::getId<State::POS>(),mtState::getId<State::VEL>()) = dt*M3D::Identity();
+    J.block(3, 3, mtState::getId<State::VEL>(),mtState::getId<State::VEL>()) = M3D::Identity();
   }
   void jacNoise(Eigen::MatrixXd& J, const mtState& state, double dt) const{
     J.setZero();
-    J.template block<3,3>(mtState::getId<State::POS>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()*sqrt(dt);
-    J.template block<3,3>(mtState::getId<State::VEL>(),mtNoise::getId<mtNoise::ACC>()) = M3D::Identity()*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::POS>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()*sqrt(dt);
+    J.block(3, 3, mtState::getId<State::VEL>(),mtNoise::getId<mtNoise::ACC>()) = M3D::Identity()*sqrt(dt);
   }
 };
 
@@ -546,13 +546,13 @@ class PredictAndUpdateExample: public LWF::Update<Innovation,FilterState,UpdateM
   void jacState(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
-    J.template block<1,3>(mtInnovation::getId<Innovation::HEI>(),mtState::getId<State::POS>()) = V3D(0,0,1).transpose();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
+    J.block(1, 3, mtInnovation::getId<Innovation::HEI>(),mtState::getId<State::POS>()) = V3D(0,0,1).transpose();
   }
   void jacNoise(Eigen::MatrixXd& J, const mtState& state) const{
     mtInnovation inn;
     J.setZero();
-    J.template block<3,3>(mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
+    J.block(3, 3, mtInnovation::getId<Innovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
     J(mtInnovation::getId<Innovation::HEI>(),mtNoise::getId<mtNoise::HEI>()) = 1.0;
   }
 };
@@ -582,19 +582,19 @@ class GIFPredictionExample: public LWF::GIFPrediction<FilterState,GIFInnovation,
   }
   void jacPreviousState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -M3D::Identity();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = -M3D::Identity()/dt;
   }
   void jacCurrentState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
   }
   void jacNoise(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACC>(),mtNoise::getId<mtNoise::ACC>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACC>(),mtNoise::getId<mtNoise::ACC>()) = M3D::Identity()/sqrt(dt);
   }
 };
 
@@ -648,22 +648,22 @@ class GIFPredictionExampleWithUpdate: public LWF::GIFPrediction<FilterState,GIFI
   }
   void jacPreviousState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -M3D::Identity();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = -M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::VEL>()) = -M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = -M3D::Identity()/dt;
   }
   void jacCurrentState(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
-    F.template block<1,3>(mtInnovation::getId<mtInnovation::HEI>(),mtState::getId<State::POS>()) = V3D(0,0,1).transpose();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtState::getId<State::POS>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACC>(),mtState::getId<State::VEL>()) = M3D::Identity()/dt;
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtState::getId<State::POS>()) = M3D::Identity();
+    F.block(1,3, mtInnovation::getId<mtInnovation::HEI>(),mtState::getId<State::POS>()) = V3D(0,0,1).transpose();
   }
   void jacNoise(Eigen::MatrixXd& F, const mtState& previousState, const mtState& currentState, double dt) const{
     F.setZero();
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::ACC>(),mtNoise::getId<mtNoise::ACC>()) = M3D::Identity()/sqrt(dt);
-    F.template block<3,3>(mtInnovation::getId<mtInnovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
+    F.block(3, 3, mtInnovation::getId<mtInnovation::VEL>(),mtNoise::getId<mtNoise::VEL>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::ACC>(),mtNoise::getId<mtNoise::ACC>()) = M3D::Identity()/sqrt(dt);
+    F.block(3, 3, mtInnovation::getId<mtInnovation::POS>(),mtNoise::getId<mtNoise::POS>()) = M3D::Identity();
     F(mtInnovation::getId<mtInnovation::HEI>(),mtNoise::getId<mtNoise::HEI>()) = 1.0;
   }
 };

@@ -175,7 +175,7 @@ class VelocityUpdate: public LWF::Update<VelocityInnovation,FILTERSTATE,Velocity
    *  @param meas  - Not used.
    *  @param dt    - Not used.
    */
-  void jacState(MXD& F, const mtState& state, bool &itered) const{
+  void jacState(MXD& F, const mtState& state) const{
     F.setZero();
     F.template block<3,3>(mtInnovation::template getId<mtInnovation::_vel>(),mtState::template getId<mtState::_vel>()) = MPD(qAM_).matrix();
   }

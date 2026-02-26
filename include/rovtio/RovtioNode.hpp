@@ -66,7 +66,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
 
-#include <rovtio_interfaces/srv/srv_reset_to_pose.hpp>
+#include <rovtio_interfaces_ros2/srv/srv_reset_to_pose.hpp>
 #include "rovtio/RovtioFilter.hpp"
 #include "rovtio/CoordinateTransform/RovtioOutput.hpp"
 #include "rovtio/CoordinateTransform/FeatureOutput.hpp"
@@ -177,7 +177,7 @@ class RovtioNode : public rclcpp::Node {
 
 
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr srvResetFilter_;
-  rclcpp::Service<rovtio_interfaces::srv::SrvResetToPose>::SharedPtr srvResetToPoseFilter_;
+  rclcpp::Service<rovtio_interfaces_ros2::srv::SrvResetToPose>::SharedPtr srvResetToPoseFilter_;
   
   
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdometry_;
@@ -274,6 +274,27 @@ class RovtioNode : public rclcpp::Node {
     gotFirstMessages_ = false;
 
     tb_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
+
+    // Handle coordinate frame naming
+    map_frame_ = "/map";
+    world_frame_ = "/world";
+    camera_frame_ = "/camera";
+    imu_frame_ = "/imu";
+
+    map_frame_ = readAndDeclareParam<std::string>("map_frame");
+    world_frame_ = readAndDeclareParam<std::string>("world_frame");
+    camera_frame_ = readAndDeclareParam<std::string>("camera_frame");
+    imu_frame_ = readAndDeclareParam<std::string>("imu_frame");
+
+    imu_topic = readAndDeclareParam<std::string>("imu_topic");
+    resize_image = readAndDeclareParam<bool>("resize_image");
+    resize_image_width = readAndDeclareParam<int>("resize_image_width");
+    resize_image_height = readAndDeclareParam<int>("resize_image_height");
+    visFps = readAndDeclareParam<int>("vis_fps");
+
+    maxDelayBeforeDropping = readAndDeclareParam<double>("maxDelayBeforeDropping"); // (s)
+    storeRuntimes = readAndDeclareParam<bool>("storeRuntimes");
+    maxTimeCamInactive = readAndDeclareParam<double>("maxTimeCamInactive"); // (s)
     
     // Subscribe topics
     std::array<std::string, mtState::nCam_> topicNames = {};
@@ -281,20 +302,20 @@ class RovtioNode : public rclcpp::Node {
     for (int i = 0; i < mtState::nCam_; ++i) {
       std::string cameraTopicName =  "/cam" + std::to_string(i) + "/image_raw";
 
-      cam_topics_[i] = readAndDeclareParam<std::string>("cam"+ std::to_string(i)"_topic");
-      std::cout << cam_topics_[i] " name: " << cameraTopicName << std::endl;
+      cam_topics_[i] = readAndDeclareParam<std::string>("cam" + std::to_string(i) + "_topic");
+      std::cout << cam_topics_[i] << " name: " << cameraTopicName << std::endl;
       topicNames[i] = cameraTopicName;
-      cam_offsets_[i] = readAndDeclareParam<double>("cam"+ std::to_string(i)"_offset");
+      cam_offsets_[i] = readAndDeclareParam<double>("cam" + std::to_string(i) + "_offset");
     }
 
     subImu_ = this->create_subscription<sensor_msgs::msg::Imu>(
-      "imu0", 
+      imu_topic, 
       1000,
       std::bind(&RovtioNode::imuCallback, 
         this, 
         std::placeholders::_1));
 
-    std::cout << "IMU topic: " << imuTopicName << std::endl;
+    std::cout << "IMU topic: " << imu_topic << std::endl;
     registerCameraSubscriber<0>(topicNames);
 
     subGroundtruth_ = this->create_subscription<geometry_msgs::msg::TransformStamped>(
@@ -326,7 +347,7 @@ class RovtioNode : public rclcpp::Node {
         std::placeholders::_1, 
         std::placeholders::_2));
 
-    srvResetToPoseFilter_ = this->create_service<custom_srv::srv::SrvResetToPose>(
+    srvResetToPoseFilter_ = this->create_service<rovtio_interfaces_ros2::srv::SrvResetToPose>(
       "/rovtio/reset_to_pose",
       std::bind(&RovtioNode::resetToPoseServiceCallback, 
         this, 
@@ -350,27 +371,6 @@ class RovtioNode : public rclcpp::Node {
       imgVisPublishers_.emplace_back(imgVisPublisher_);
     }
     pubImuBias_ = this->create_publisher<sensor_msgs::msg::Imu>("rovtio/imu_biases", 1 );
-
-    // Handle coordinate frame naming
-    map_frame_ = "/map";
-    world_frame_ = "/world";
-    camera_frame_ = "/camera";
-    imu_frame_ = "/imu";
-
-    map_frame_ = readAndDeclareParam<std::string>("map_frame");
-    world_frame_ = readAndDeclareParam<std::string>("world_frame");
-    camera_frame_ = readAndDeclareParam<std::string>("camera_frame");
-    imu_frame_ = readAndDeclareParam<std::string>("imu_frame");
-
-    imu_topic = readAndDeclareParam<std::string>("imu_topic");
-    resize_image = readAndDeclareParam<bool>("resize_image");
-    resize_image_width = readAndDeclareParam<int>("resize_image_width");
-    resize_image_height = readAndDeclareParam<int>("resize_image_height");
-    visFps = readAndDeclareParam<int>("vis_fps");
-
-    maxDelayBeforeDropping = readAndDeclareParam<double>("maxDelayBeforeDropping"); // (s)
-    storeRuntimes = readAndDeclareParam<bool>("storeRuntimes");
-    maxTimeCamInactive = readAndDeclareParam<double>("maxTimeCamInactive"); // (s)
 
     // Initialize messages
     transformMsg_.header.frame_id = world_frame_;
@@ -796,7 +796,7 @@ class RovtioNode : public rclcpp::Node {
       poseUpdateMeas_.pos() = JrJV;
       QPD qJV(transform->transform.rotation.w,transform->transform.rotation.x,transform->transform.rotation.y,transform->transform.rotation.z);
       poseUpdateMeas_.att() = qJV.inverted();
-      mpFilter_->template addUpdateMeas<1>(poseUpdateMeas_,rclcpp::Time(odometry->header.stamp).nanoseconds() * 1e-9 + mpPoseUpdate_->timeOffset_);
+      mpFilter_->template addUpdateMeas<1>(poseUpdateMeas_,rclcpp::Time(transform->header.stamp).nanoseconds() * 1e-9 + mpPoseUpdate_->timeOffset_);
       updateAndPublish();
     }
   }
@@ -846,8 +846,8 @@ class RovtioNode : public rclcpp::Node {
 
   /** \brief ROS service handler for resetting the filter to a given pose.
    */
-  bool resetToPoseServiceCallback(custom_srv::srv::SrvResetToPose::Request::SharedPtr request,
-                                  custom_srv::srv::SrvResetToPose::Response::SharedPtr response){
+  bool resetToPoseServiceCallback(rovtio_interfaces_ros2::srv::SrvResetToPose::Request::SharedPtr request,
+                                  rovtio_interfaces_ros2::srv::SrvResetToPose::Response::SharedPtr response){
     V3D WrWM(request->t_wm.position.x, request->t_wm.position.y,
              request->t_wm.position.z);
     QPD qWM(request->t_wm.orientation.w, request->t_wm.orientation.x,

@@ -71,32 +71,34 @@ namespace rovtio {
  *
  *  @tparam STATE - Filter State
  */
-  template<typename STATE>
-  class ImgUpdateMeasAuxiliary : public LWF::AuxiliaryBase<ImgUpdateMeasAuxiliary<STATE>> {
-  public:
-    ImgUpdateMeasAuxiliary() {
-      reset(0.0);
-    };
-
-    virtual ~ImgUpdateMeasAuxiliary() {};
-
-    void reset(const double t) {
-      imgTime_ = t;
+template<typename STATE>
+class ImgUpdateMeasAuxiliary: public LWF::AuxiliaryBase<ImgUpdateMeasAuxiliary<STATE>>{
+ public:
+  ImgUpdateMeasAuxiliary(){
+    reset(0.0);
+  };
+  virtual ~ImgUpdateMeasAuxiliary(){};
+  void reset(const double t){
+    imgTime_ = t;
+    for(int i=0;i<STATE::nCam_;i++){
+      isValidPyr_[i] = false;
     }
-
-    bool areAllValid(){
+  }
+  bool areAllValid(){
     for(int i=0;i<STATE::nCam_;i++){
       if(isValidPyr_[i] == false) return false;
     }
     return true;
   }
-    ImagePyramid<STATE::nLevels_> pyr_[STATE::nCam_];
-    double imgTime_;
-    int activeModality_; // The camera ID of the camera that took the image which is being updated.
-    bool camActive_[STATE::nCam_]; // Custom to track which cameras are receiving new images
-  };
+  ImagePyramid<STATE::nLevels_> pyr_[STATE::nCam_];
+  bool isValidPyr_[STATE::nCam_];
+  double imgTime_;
+  int activeModality_; // The camera ID of the camera that took the image which is being updated.
+  bool camActive_[STATE::nCam_]; // Custom to track which cameras are receiving new images
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 /**  \brief Update measurement class (all data in auxillary)
  *
