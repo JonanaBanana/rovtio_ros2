@@ -2,7 +2,7 @@
 ; #include "/home/user/workspace/rovtio/cfg/rovtio_custom.info"
 Common
 {
-	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
+	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
 	verbose false;				Is the verbose active
 	store_runtimes true;        Should runtimes of selected functions be stored to csv files (often in ~/.ros)
@@ -220,7 +220,7 @@ PoseUpdate
     pre_cov_MrMV 1.0e-4;							Covariance parameter of pose between inertial frames, linear part [m^2/s]
     pre_cov_qVM 1.0e-4;							Covariance parameter of pose between inertial frames, rotational part [rad^2/s]
     MahalanobisTh0 12.6511204;					Mahalonobis distance treshold of pose measurement
-	doVisualization false;						Should the measured poses be vizualized
+	doVisualization true;						Should the measured poses be vizualized
 	enablePosition true;						Should the linear part be used during the update
 	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
 	noFeedbackToRovtio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVTIO should benefit frome the posed measurements.

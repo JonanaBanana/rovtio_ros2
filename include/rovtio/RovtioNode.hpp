@@ -276,36 +276,33 @@ class RovtioNode : public rclcpp::Node {
     tb_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
 
     // Handle coordinate frame naming
-    map_frame_ = "/map";
-    world_frame_ = "/world";
-    camera_frame_ = "/camera";
-    imu_frame_ = "/imu";
 
-    map_frame_ = readAndDeclareParam<std::string>("map_frame");
-    world_frame_ = readAndDeclareParam<std::string>("world_frame");
-    camera_frame_ = readAndDeclareParam<std::string>("camera_frame");
-    imu_frame_ = readAndDeclareParam<std::string>("imu_frame");
+    map_frame_    = readAndDeclareParam<std::string>("map_frame",    "/map");
+    world_frame_  = readAndDeclareParam<std::string>("world_frame",  "/world");
+    camera_frame_ = readAndDeclareParam<std::string>("camera_frame", "/camera");
+    imu_frame_    = readAndDeclareParam<std::string>("imu_frame",    "/imu");
 
-    imu_topic = readAndDeclareParam<std::string>("imu_topic");
-    resize_image = readAndDeclareParam<bool>("resize_image");
-    resize_image_width = readAndDeclareParam<int>("resize_image_width");
-    resize_image_height = readAndDeclareParam<int>("resize_image_height");
-    visFps = readAndDeclareParam<int>("vis_fps");
+    imu_topic          = readAndDeclareParam<std::string>("imu_topic", "/imu0");
+    resize_image       = readAndDeclareParam<bool>("resize_image", false);
+    resize_image_width = readAndDeclareParam<int>("resize_image_width", 320);
+    resize_image_height= readAndDeclareParam<int>("resize_image_height", 240);
+    visFps             = readAndDeclareParam<int>("vis_fps", 5);
 
-    maxDelayBeforeDropping = readAndDeclareParam<double>("maxDelayBeforeDropping"); // (s)
-    storeRuntimes = readAndDeclareParam<bool>("storeRuntimes");
-    maxTimeCamInactive = readAndDeclareParam<double>("maxTimeCamInactive"); // (s)
+    maxDelayBeforeDropping = readAndDeclareParam<double>("maxDelayBeforeDropping", 0.2);
+    storeRuntimes          = readAndDeclareParam<bool>("storeRuntimes", false);
+    maxTimeCamInactive     = readAndDeclareParam<double>("maxTimeCamInactive", 2.0);
     
     // Subscribe topics
     std::array<std::string, mtState::nCam_> topicNames = {};
 
-    for (int i = 0; i < mtState::nCam_; ++i) {
+    for (int i = 0; i < mtState::nCam_; i++) {
       std::string cameraTopicName =  "/cam" + std::to_string(i) + "/image_raw";
 
-      cam_topics_[i] = readAndDeclareParam<std::string>("cam" + std::to_string(i) + "_topic");
+      cam_topics_[i]  = readAndDeclareParam<std::string>("cam" + std::to_string(i) + "_topic",
+                                                    "/cam" + std::to_string(i) + "/image_raw");
       std::cout << cam_topics_[i] << " name: " << cameraTopicName << std::endl;
       topicNames[i] = cameraTopicName;
-      cam_offsets_[i] = readAndDeclareParam<double>("cam" + std::to_string(i) + "_offset");
+      cam_offsets_[i] = readAndDeclareParam<double>("cam" + std::to_string(i) + "_offset", 0.0);
     }
 
     subImu_ = this->create_subscription<sensor_msgs::msg::Imu>(
@@ -531,9 +528,9 @@ class RovtioNode : public rclcpp::Node {
    * @return paramter value
    */
   template <typename paramType>
-  paramType readAndDeclareParam(std::string paramName) {
+  paramType readAndDeclareParam(std::string paramName, paramType defaultValue = paramType{}) {
+    this->declare_parameter(paramName, defaultValue);
     paramType value;
-    this->declare_parameter(paramName, value);
     this->get_parameter(paramName, value);
     std::stringstream ss;
     ss << value;

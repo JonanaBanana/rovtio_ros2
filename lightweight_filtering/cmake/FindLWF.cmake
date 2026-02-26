@@ -1,9 +1,9 @@
 # This file was automatically generated during the installation of the lightweight_filtering library
 # and can be used through cmake to find the corresponding header files. A copy of this
-# file was created in /usr/share/cmake-3.22/Modules (depending on the CMAKE_ROOT variable).
+# file was created in /usr/local/share/cmake-3.31/Modules (depending on the CMAKE_ROOT variable).
 
 set(LWF_INCLUDE_DIRS
-/home/tvnav/rovtio_ws/install/rovtio/include/LWF/include
+/home/jonathan/ros2_ws/install/rovtio/include/LWF/include
 )
 set(LWF_FOUND TRUE)
-message("-- LWF found (include: /home/tvnav/rovtio_ws/install/rovtio/include/LWF/include)")
+message("-- LWF found (include: /home/jonathan/ros2_ws/install/rovtio/include/LWF/include)")

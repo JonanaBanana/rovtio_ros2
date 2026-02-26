@@ -398,7 +398,7 @@ class ArrayElement: public ElementBase<ArrayElement<Element,M>,typename Element:
   template<bool b = (D_>0), typename std::enable_if<b>::type* = nullptr>
   void boxPlus_(const mtDifVec& vecIn, ArrayElement& stateOut) const{
     for(unsigned int i=0; i<M_;i++){
-      array_[i].boxPlus(vecIn.block(Element::D_, 1, Element::D_*i, 0),stateOut.array_[i]);
+      array_[i].boxPlus(vecIn.segment(Element::D_*i, Element::D_), stateOut.array_[i]);
     }
   }
   template<bool b = (D_>0), typename std::enable_if<!b>::type* = nullptr>
@@ -411,7 +411,7 @@ class ArrayElement: public ElementBase<ArrayElement<Element,M>,typename Element:
     typename Element::mtDifVec difVec;
     for(unsigned int i=0; i<M_;i++){
       array_[i].boxMinus(stateIn.array_[i],difVec);
-      vecOut.block(Element::D_, 1, Element::D_*i, 0) = difVec;
+      vecOut.segment(Element::D_*i, Element::D_) = difVec;
     }
   }
   template<bool b = (D_>0), typename std::enable_if<!b>::type* = nullptr>
@@ -523,7 +523,7 @@ class State{
   template<unsigned int i=0,unsigned int j=0,typename std::enable_if<(i<E_)>::type* = nullptr>
   inline void boxPlus_(const mtDifVec& vecIn, State<Elements...>& stateOut) const{
     if(std::tuple_element<i,decltype(mElements_)>::type::D_>0){
-      std::get<i>(mElements_).boxPlus(vecIn.block(std::tuple_element<i,decltype(mElements_)>::type::D_, 1, j, 0),std::get<i>(stateOut.mElements_));
+      std::get<i>(mElements_).boxPlus(vecIn.segment(j, std::tuple_element<i,decltype(mElements_)>::type::D_), std::get<i>(stateOut.mElements_));
     } else { // Required for auxiliary states
       Eigen::Matrix<double,std::tuple_element<i,decltype(mElements_)>::type::D_,1> dummyVec;
       std::get<i>(mElements_).boxPlus(dummyVec,std::get<i>(stateOut.mElements_));
@@ -540,7 +540,7 @@ class State{
     if(std::tuple_element<i,decltype(mElements_)>::type::D_>0){
       typename std::tuple_element<i,decltype(mElements_)>::type::mtDifVec difVec;
       std::get<i>(mElements_).boxMinus(std::get<i>(stateIn.mElements_),difVec);
-      vecOut.block(std::tuple_element<i,decltype(mElements_)>::type::D_, 1, j, 0) = difVec;
+      vecOut.segment(j, std::tuple_element<i,decltype(mElements_)>::type::D_) = difVec;
     }
     boxMinus_<i+1,j+std::tuple_element<i,decltype(mElements_)>::type::D_>(stateIn,vecOut);
   }
