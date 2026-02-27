@@ -1,21 +1,19 @@
-# ROVTIO: RObust Visual Thermal Inertial Odometry #
+# ROVTIO: RObust Visual Thermal Inertial Odometry - For ROS2#
+This repo contains a ros2 implementation of ROVTIO (tested on Humble, Ubuntu 22.04). 
 
-This repo contains ROVTIO, an algorithm for odometry estimation using both a visual camera, an infrared camera and an IMU. 
-To extend visual inertial odometry to dark environments one can instead of a standard visual camera use a thermal camera. However, thermal cameras struggle in thermal flat environments, i.e. environments where everything have the same temperature and the emissivity is similar. To get the best of both modalities ROVTIO use both a thermal camera and a visual camera. 
-Due to the differences between the modalities does it not rely on stereo correspondences and it can both initialize and track if only one of the camera streams is available.
+The ROS2 implementation is heavily inspired by the ROVIO ROS2 implementation by suyash023 but with modifications for ROVTIO (Visual + Thermal Image Support). see suyash023's [ROVIO ROS2](https://github.com/suyash023/rovio).
+
+The work of [ROVTIO](https://github.com/ntnu-arl/rovtio) is built on the original [ROVIO](https://github.com/ethz-asl/rovio). Check their GitHubs for further information and informative resources.
 
 
-This work is based on [ROVIO](https://github.com/ethz-asl/rovio), which it inheriths some properties from. Same as ROVIO, ROVTIO is a direct, robocentric filter-based method. The filter ROVTIO use is the same iterated extended kalman filter that ROVIO use. These traits also allow ROVTIO to initialize the map at a high uncertainty and let it converge during operation, removing the need for an explicit initialization procedure. 
-
-ROVTIO was developed as a part of the work for the authors [master thesis](https://hdl.handle.net/11250/2828783). The master thesis contains analysis of the benefit of using both thermal and visual compared to using only one of them. 
-
-The data used for analysis in the master thesis is provided [here](https://huggingface.co/datasets/ntnu-arl/rovtio). It is collected by Mihir Kulkarni at Autonomous Robots lab the University of Nevada.
+# Original ROVTIO README
 
 ## Install
 
 ROVTIO requires no additional dependencies from the ones ROVIO requires. See the ROVIO install directions [below](#install-without-opengl-scene).
 
 Note that it is recomended to install `kindr` [using catkin](https://github.com/ethz-asl/kindr#building-with-catkin).
+
 ## Setup and running
  
 1. Install the dependencies for [ROVIO](#install-without-opengl-scene)
