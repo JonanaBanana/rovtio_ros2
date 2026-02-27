@@ -1,4 +1,4 @@
-# ROVTIO: RObust Visual Thermal Inertial Odometry - For ROS2#
+# ROVTIO: RObust Visual Thermal Inertial Odometry - For ROS2
 This repo contains a ros2 implementation of ROVTIO (tested on Humble, Ubuntu 22.04). 
 
 The ROS2 implementation is heavily inspired by the ROVIO ROS2 implementation by suyash023 but with modifications for ROVTIO (Visual + Thermal Image Support). see suyash023's [ROVIO ROS2](https://github.com/suyash023/rovio).
