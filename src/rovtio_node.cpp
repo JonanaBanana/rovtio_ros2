@@ -31,8 +31,8 @@
 
 #include <Eigen/StdVector>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #pragma GCC diagnostic pop
@@ -66,7 +66,7 @@ static constexpr int patchSize_ = 6; // Edge length of the patches (in pixel). M
 #ifdef ROVTIO_NCAM
 static constexpr int nCam_ = ROVTIO_NCAM;
 #else
-static constexpr int nCam_ = 1; // Used total number of cameras.
+static constexpr int nCam_ = 2; // Used total number of cameras.
 #endif
 
 #ifdef ROVTIO_NPOSE
@@ -118,7 +118,7 @@ void declareParameters(std::shared_ptr<rovtio::RovtioNode<mtFilter>> node)
   std::string filter_config;
 
   // Node
-  std::shared_ptr<rovtio::RovtioNode<rovtio::RovtioFilter<rovtio::FilterState<25, nLevels_, patchSize_, nCam_, nPose_>>>> node;
+  std::shared_ptr<rovtio::RovtioNode<rovtio::RovtioFilter<rovtio::FilterState<nMax_, nLevels_, patchSize_, nCam_, nPose_>>>> node;
   node = std::make_shared<rovtio::RovtioNode<mtFilter>>(mpFilter);
   declareParameters(node);
   node->get_parameter("filter_config", filter_config);

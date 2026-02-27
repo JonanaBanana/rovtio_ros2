@@ -28,10 +28,7 @@
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>tf2_ros</depend>
-  <depend>rosbag2_cpp</depend>
-  <depend>rosbag2_storage</depend>
   <depend>rovtio_interfaces_ros2</depend>
-  <depend>rosbag</depend>
   <depend>yaml_cpp_catkin</depend>
   
   <buildtool_depend>rosidl_default_generators</buildtool_depend>

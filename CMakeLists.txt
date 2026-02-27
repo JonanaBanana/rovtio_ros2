@@ -42,8 +42,6 @@ find_package(rclcpp REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(rosbag2_cpp REQUIRED)
-find_package(rosbag2_storage REQUIRED)
 find_package(image_transport REQUIRED)
 
 # YAML
@@ -84,8 +82,6 @@ ament_target_dependencies(${PROJECT_NAME}_lib
 		tf2_ros
 		std_srvs
 		visualization_msgs
-		rosbag2_cpp
-		rosbag2_storage
 		rovtio_interfaces_ros2
 		image_transport
 )
@@ -100,10 +96,6 @@ add_executable(rovtio_node src/rovtio_node.cpp)
 ament_target_dependencies(rovtio_node rclcpp rovtio_interfaces_ros2)
 target_link_libraries(rovtio_node ${PROJECT_NAME}_lib)
 
-add_executable(rovtio_rosbag_loader src/rovtio_rosbag_loader.cpp)
-ament_target_dependencies(rovtio_rosbag_loader rclcpp rovtio_interfaces_ros2)
-target_link_libraries(rovtio_rosbag_loader ${PROJECT_NAME}_lib)
-
 add_executable(feature_tracker_node src/feature_tracker_node.cpp)
 ament_target_dependencies(feature_tracker_node rclcpp rovtio_interfaces_ros2)
 target_link_libraries(feature_tracker_node ${PROJECT_NAME}_lib)
@@ -112,7 +104,6 @@ target_link_libraries(feature_tracker_node ${PROJECT_NAME}_lib)
 install(TARGETS
 		${PROJECT_NAME}_lib
 		rovtio_node
-		rovtio_rosbag_loader
 		feature_tracker_node
 		DESTINATION lib/${PROJECT_NAME}
 )
