@@ -118,7 +118,7 @@ void declareParameters(std::shared_ptr<rovtio::RovtioNode<mtFilter>> node)
   std::string filter_config;
 
   // Node
-  std::shared_ptr<rovtio::RovtioNode<rovtio::RovtioFilter<rovtio::FilterState<25, 4, 6, 1, 0>>>> node;
+  std::shared_ptr<rovtio::RovtioNode<rovtio::RovtioFilter<rovtio::FilterState<25, nLevels_, patchSize_, nCam_, nPose_>>>> node;
   node = std::make_shared<rovtio::RovtioNode<mtFilter>>(mpFilter);
   declareParameters(node);
   node->get_parameter("filter_config", filter_config);

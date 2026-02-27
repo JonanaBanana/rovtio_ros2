@@ -1,36 +1,33 @@
 ; You can partially override parameter set in this file by creating your own subset of parameter in a separate info-file and include it with:
-; #include "/home/user/workspace/rovtio/cfg/rovtio_custom.info"
+; #include "/home/user/workspace/rovio/cfg/rovio_custom.info"
 Common
 {
-	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
+	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
 	verbose false;				Is the verbose active
 	store_runtimes true;        Should runtimes of selected functions be stored to csv files (often in ~/.ros)
 }
 Camera0
 {
-	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  0.00666398307551;										X-entry of IMU to Camera quaterion (Hamilton)
-	qCM_y  -0.0079168224269;										Y-entry of IMU to Camera quaterion (Hamilton)
-	qCM_z  -0.701985972528;											Z-entry of IMU to Camera quaterion (Hamilton)
-	qCM_w   0.712115587266;											W-entry of IMU to Camera quaterion (Hamilton)
-	MrMC_x -0.0111674199187;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y -0.0574640920022;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.0207586947896;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
-    imuCamera_timeOffset 0.0;                                       Time-offset added to image timestamp
+  CalibrationFile  ;
+  qCM_x    0.5815717;                               X-entry of IMU to Camera quaterion (Hamilton)
+  qCM_y   -0.5690489;                               Y-entry of IMU to Camera quaterion (Hamilton)
+  qCM_z    0.4071662;                               Z-entry of IMU to Camera quaterion (Hamilton)
+  qCM_w    0.4149379;                               W-entry of IMU to Camera quaterion (Hamilton)
+  MrMC_x -0.019282391666587094;                     X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+  MrMC_y -0.007020499072517088;                     Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+  MrMC_z -0.13646235628270134;                      Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
-
 Camera1
 {
-	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  0.00151329637706;										X-entry of IMU to Camera quaterion (Hamilton)
-	qCM_y  -0.0123329249764;										Y-entry of IMU to Camera quaterion (Hamilton)
-	qCM_z  -0.702657352863;											Z-entry of IMU to Camera quaterion (Hamilton)
-	qCM_w  0.711419885414;											W-entry of IMU to Camera quaterion (Hamilton)
-	MrMC_x -0.0091929160801;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.0540646643676;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.0190387660614;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
-    imuCamera_timeOffset 0.0;                                       Time-offset added to image timestamp
+  CalibrationFile  ;
+  qCM_x  -0.575090212567;                              X-entry of IMU to Camera quaterion (Hamilton)
+  qCM_y  0.57200349159;                                Y-entry of IMU to Camera quaterion (Hamilton)
+  qCM_z  -0.413485129831;                              Z-entry of IMU to Camera quaterion (Hamilton)
+  qCM_w  -0.413658434494;                               W-entry of IMU to Camera quaterion (Hamilton)
+  MrMC_x 0.132385017016;                               X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+  MrMC_y 0.0231335126268;                              Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+  MrMC_z -0.0421824381085;                             Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Init
 {
@@ -78,24 +75,23 @@ ImgUpdate
 {
 	updateVecNormTermination 1.0e-4;
 	maxNumIteration 20;
-    useFeatureDetectorScoreSelection false;     Should feature detector scores be used for feature selection
-    doPatchWarping true;				        Should the patches be warped
-    doFrameVisualisation true;					Should the frames be visualized
-    visualizePatches false;						Should the patches be visualized
-    useDirectMethod true;						Should the EKF-innovation be based on direct intensity error (o.w. reprojection error)
-    startLevel 2;								Highest patch level which is being employed (must be smaller than the hardcoded template parameter)
-    endLevel 1;									Lowest patch level which is being employed
-    nDetectionBuckets 100;						Number of discretization buckets used during the candidates selection
-    MahalanobisTh 9.21;							Mahalanobis treshold for the update, 5.8858356
-    UpdateNoise0;                               Custom: Spesify the update noise per camera
+    doPatchWarping true;										Should the patches be warped
+    doFrameVisualisation true;									Should the frames be visualized
+    visualizePatches false;										Should the patches be visualized
+    useDirectMethod true;										Should the EKF-innovation be based on direct intensity error (o.w. reprojection error)
+    startLevel 2;												Highest patch level which is being employed (must be smaller than the hardcoded template parameter)
+    endLevel 1;													Lowest patch level which is being employed
+    nDetectionBuckets 100;										Number of discretization buckets used during the candidates selection
+    MahalanobisTh 9.21;											Mahalanobis treshold for the update, 5.8858356
+    UpdateNoise0;                                               Custom: Spesify the update noise per camera
     {
-        pix 4;                                  Covariance used for the reprojection error, 1/focal_length is roughly 1 pixel std [rad] (~1/f ~ 1/400^2 = 1/160000)
-        int 450;     						    Covariance used for the photometric error [intensity^2]
+        pix 4;                                                  Covariance used for the reprojection error, 1/focal_length is roughly 1 pixel std [rad] (~1/f ~ 1/400^2 = 1/160000)
+        int 450;     										    Covariance used for the photometric error [intensity^2]
     }
     UpdateNoise1;
     {
-        pix 4;      							Covariance used for the reprojection error, 1/focal_length is roughly 1 pixel std [rad] (~1/f ~ 1/400^2 = 1/160000)
-        int 450;     							Covariance used for the photometric error [intensity^2]
+        pix 5;      											Covariance used for the reprojection error, 1/focal_length is roughly 1 pixel std [rad] (~1/f ~ 1/400^2 = 1/160000)
+        int 1000;     										    Covariance used for the photometric error [intensity^2]
     }
     initCovFeature_0 0.5;										Covariance for the initial distance (Relative to initialization depth [m^2/m^2])
     initCovFeature_1 1.0e-5;		    						Covariance for the initial bearing vector, x-component [rad^2]
@@ -103,7 +99,7 @@ ImgUpdate
     initDepth 0.5;												Initial value for the initial distance parameter
     startDetectionTh 0.8;										Threshold for detecting new features (min: 0, max: 1)
     scoreDetectionExponent 0.25;								Exponent used for weighting the distance between candidates
-    penaltyDistance 100;     					    			Maximal distance which gets penalized during bucketing [pix]
+    penaltyDistance 75;										Maximal distance which gets penalized during bucketing [pix]
     zeroDistancePenalty 100;									Penalty for zero distance (max: nDetectionBuckets)
     statLocalQualityRange 10;									Number of frames for local quality evaluation
     statLocalVisibilityRange 100;								Number of frames for local visibility evaluation
@@ -113,8 +109,8 @@ ImgUpdate
     minTrackedAndFreeFeatures 0.75;								Minimum of amount of feature which are either tracked or free
     removalFactor 1.1;											Factor for enforcing feature removal if not enough free
     minRelativeSTScore 0.75;									Minimum relative ST-score for extracting new feature patch
-    minAbsoluteSTScore0 5.0;									Minimum absolute ST-score for extracting new feature patch
-    minAbsoluteSTScore1 5.0;									Minimum absolute ST-score for extracting new feature patch
+    minAbsoluteSTScore0 5.0;										Minimum absolute ST-score for extracting new feature patch
+    minAbsoluteSTScore1 4.0;										Minimum absolute ST-score for extracting new feature patch
     minTimeBetweenPatchUpdate 1.0;								Minimum time between new multilevel patch extrection [s]
     fastDetectionThreshold0 5;									Fast corner detector treshold while adding new feature
     fastDetectionThreshold1 5;									Fast corner detector treshold while adding new feature
@@ -122,7 +118,7 @@ ImgUpdate
     alignCoverageRatio 2;										How many sigma of the uncertainty should be covered in the adaptive alignement
     alignMaxUniSample 1;										Maximal number of alignment seeds on one side -> total number of sample = 2n+1. Carefull can get very costly if diverging!
     patchRejectionTh0 50.0;										If the average itensity error is larger than this the feauture is rejected [intensity], if smaller 0 the no check is performed
-    patchRejectionTh1 50.0;										If the average itensity error is larger than this the feauture is rejected [intensity], if smaller 0 the no check is performed
+    patchRejectionTh1 60.0;										If the average itensity error is larger than this the feauture is rejected [intensity], if smaller 0 the no check is performed
     alignmentHuberNormThreshold 10;								Intensity error threshold for Huber norm (enabled if > 0)
     alignmentGaussianWeightingSigma -1;							Width of Gaussian which is used for pixel error weighting (enabled if > 0)
     alignmentGradientExponent 0.0;								Exponent used for gradient based weighting of residuals
@@ -135,11 +131,11 @@ ImgUpdate
     noiseGainForOffCamera 1.0;									Factor added on update noise if not main camera
     discriminativeSamplingDistance 0.02;						Sampling distance for checking discriminativity of patch (if <= 0.0 no check is performed).
     discriminativeSamplingGain 1.1;								Gain for threshold above which the samples must lie (if <= 1.0 the patchRejectionTh is used).
-    maxAllowedFeatureDistance 100.0;                             Max allowed estimated feature distance after performing update, remove features with very far away estimated depth and clustered features during backward motion.
+    maxAllowedFeatureDistance 25.0;                             Max allowed estimated feature distance after performing update, remove features with very far away estimated depth and clustered features during backward motion.
     minSTScoreForModalitySelection0 40;                         Min Shi-Tomasi threshold for counting new features when choosing preferable modality (for camera 0)
-    minSTScoreForModalitySelection1 40;                        Min Shi-Tomasi threshold for counting new features when choosing preferable modality (for camera 1)
+    minSTScoreForModalitySelection1 220;                        Min Shi-Tomasi threshold for counting new features when choosing preferable modality (for camera 1)
     additionalScoreFromOtherModality0 50.0;                     The score which are added to features that are close to a feature in the other modality
-    additionalScoreFromOtherModality1 50.0;                     The score which are added to features that are close to a feature in the other modality
+    additionalScoreFromOtherModality1 70.0;                     The score which are added to features that are close to a feature in the other modality
     maxDistanceForApproximatlyLocalizingFeatures -10;           The max euclidian distance which is used to define "close" when assosiating features between the modalities. (Negative if not adding anything ever.)
     modalitySelectionAdditionScalar 1.0;                        How much should the modality be multiplied with to get the number of allowed features in the modality selection.
     relativeThresholdforUsingLiveFeatureScores 0.5;             The relative scaling of the threshold for when to use live features lifetime to decide prefered modality
@@ -149,7 +145,7 @@ ImgUpdate
     	isEnabled 1;											Is the motion detection enabled
 	    rateOfMovingFeaturesTh 0.5;								Amount of feature with motion for overall motion detection
 	    pixelCoordinateMotionTh 1.0;							Threshold for motion detection for patched [pixels]
-	    minFeatureCountForNoMotionDetection 5;					Min feature count in frame for motion detection
+	    minFeatureCountForNoMotionDetection 1;					Min feature count in frame for motion detection
 	}
     ZeroVelocityUpdate
     {
@@ -192,7 +188,7 @@ Prediction
     {
         g_x 0.0;                                    X-Component of gravity vector [m^2/s]
         g_y 0.0;                                    Y-Component of gravity vector [m^2/s]
-        g_z -9.81;                               Z-Component of gravity vector [m^2/s]
+        g_z -10.0854;                               Z-Component of gravity vector [m^2/s]
     }
     MotionDetection
     {
@@ -223,7 +219,7 @@ PoseUpdate
 	doVisualization true;						Should the measured poses be vizualized
 	enablePosition true;						Should the linear part be used during the update
 	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
-	noFeedbackToRovtio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVTIO should benefit frome the posed measurements.
+	noFeedbackToRovtio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
 	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
 	timeOffset 0.0;								Time offset added to the pose measurement timestamps
     useOdometryCov false;                    Should the UpdateNoise position covariance be scaled using the covariance in the Odometry message
@@ -256,4 +252,3 @@ VelocityUpdate
     qAM_z 0;
     qAM_w 1;
 }
-

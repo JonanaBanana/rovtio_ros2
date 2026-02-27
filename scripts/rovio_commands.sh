@@ -5,26 +5,6 @@
 #Usage: source rovio_commands.sh . Then execute any of the functions below.
 #Note: run all commands in this file from rovio_ws folder in a terminal
 
-
-#function to build rovio
-function build_rovio() {
-  colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
-}
-
-#function to build rovio fresh
-function build_rovio_fresh() {
-  ROVIO_WS=$(pwd)
-  rm -rf $ROVIO_WS/build $ROVIO_WS/install $ROVIO_WS/log
-  colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
-}
-
-#function to build rovio fresh in debug mode
-function build_rovio_fresh() {
-  ROVIO_WS=$(pwd)
-  rm -rf $ROVIO_WS/build $ROVIO_WS/install $ROVIO_WS/log
-  colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug
-}
-
 #function to convert euroc datasets from ros 1 to ros2 bag formats
 function convert_euroc_rosbags(){
   DATASETS_DIR=$(pwd)/datasets/machine_hall
@@ -42,11 +22,6 @@ function convert_euroc_rosbags(){
 
 }
 
-#function to build rovio in debug mode
-function build_rovio_debug() {
-  colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug
-}
-
 #function to install euroc datasets
 function install_euroc_datasets() {
   DATASETS_DIR=$(pwd)/datasets
@@ -55,98 +30,6 @@ function install_euroc_datasets() {
   wget -P $DATASETS_DIR $EUROC_LINK
   unzip -d ${DATASETS_DIR} ${DATASETS_DIR}/download
   rm -rf ${DATASETS_DIR}/download
-}
-
-
-
-#fuction to install evaluation dependecies
-#Note evo installation might require specific version dependencies.
-#Follow the debug messages and install the specific versions
-function install_evaluation_dependencies() {
-  pip install evo
-}
-
-#function to install dataset conversion dependencies
-function install_dataset_dependencies() {
-  sudo apt-get install python3-pip
-  pip install rosbags
-}
-
-
-#function to check if ROS2 is installed
-function check_ros2_install() {
-  ROS_LOCATION="/opt/ros"
-  if [[ -d $ROS_LOCATION ]]; then
-    echo "yes"
-  else
-    echo "no"
-  fi
-  return 0
-}
-
-
-#function to install kindr
-function install_kindr() {
-  KINDR_URL="https://github.com/ethz-asl/kindr.git"
-  CURRENT_DIR=$(pwd)
-  cd ~/
-  git clone ${KINDR_URL}
-  cd kindr
-  mkdir -p build
-  cd build
-  cmake ..
-  make -j10
-  sudo make install
-  cd ${CURRENT_DIR}
-}
-
-#function to install image_view to view ROVIO vis published
-function install_image_view() {
-  sudo apt install -y ros-${1}-image-view
-}
-
-
-#function to install ROS2 if not alredy present
-function install_ros2() {
-  ROS_DISTRO="humble"
-  install=check_ros2_install
-  if [[ $install == "yes" ]]; then
-    echo "ROS2 found! Skipping ROS2 install"
-  else
-    echo "Installing ROS2: $ROS_DISTRO"
-    sudo apt update && sudo apt install locales
-    sudo locale-gen en_US en_US.UTF-8
-    sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-    export LANG=en_US.UTF-8
-    sudo apt update && sudo apt install locales
-    sudo locale-gen en_US en_US.UTF-8
-    sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-    export LANG=en_US.UTF-8
-    sudo apt update && sudo apt install curl -y
-    export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
-    curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
-    sudo dpkg -i /tmp/ros2-apt-source.deb
-    sudo apt update
-    sudo apt upgrade
-    sudo apt install ros-${ROS_DISTRO}-desktop -y
-    sudo apt install ros-dev-tools -y
-    echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
-  fi
-}
-
-
-#function to install rovio dependencies
-function install_dependencies() {
-  install_ros2
-  install_image_view "humble"
-  install_kindr
-}
-
-#function to install rovio scene depdencies
-function install_scene_dependencies() {
-  sudo apt-add-repository universe
-  sudo apt-get update
-  sudo apt-get install freeglut3-dev libglew-dev
 }
 
 #function to wait for ROVIO to finish completion

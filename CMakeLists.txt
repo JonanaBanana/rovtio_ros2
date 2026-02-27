@@ -14,8 +14,8 @@ endif()
 
 # ROVTIO PARAMETERS
 set(ROVTIO_NMAXFEATURE 25 CACHE STRING "Number of feature for ROVTIO")
-set(ROVTIO_NCAM 1 CACHE STRING "Number of enabled cameras")
-set(ROVTIO_NLEVELS 4 CACHE STRING "Number of image leavels for the features")
+set(ROVTIO_NCAM 2 CACHE STRING "Number of enabled cameras")
+set(ROVTIO_NLEVELS 4 CACHE STRING "Number of image levels for the features")
 set(ROVTIO_PATCHSIZE 6 CACHE STRING "Size of patch (edge length in pixel)")
 set(ROVTIO_NPOSE 0 CACHE STRING "Additional estimated poses for external pose measurements")
 add_definitions(-DROVTIO_NMAXFEATURE=${ROVTIO_NMAXFEATURE})

@@ -1,0 +1,373 @@
+; ================================================================
+;  rovtio.info — 4-camera ROVTIO configuration
+;  Build with: -DROVTIO_NCAM=4 -DROVTIO_NMAXFEATURE=25
+;
+;  Camera layout:
+;    Camera 0 — visual (RGB/grayscale)
+;    Camera 1 — thermal (infrared)
+;
+;  Partially override any value by creating a separate file and
+;  including it at the top with:
+;  #include "/path/to/my_overrides.info"
+; ================================================================
+
+Common
+{
+    doVECalibration  true;          Estimate camera-IMU extrinsics online.
+    ;                               Set false only with a precise pre-calibration.
+    depthType        1;             1 = inverse depth (recommended).
+    ;                               0 = normal, 2 = log, 3 = hyperbolic
+    verbose          false;
+    store_runtimes   false;         Store runtimes of selected functions to csv files
+}
+
+; ----------------------------------------------------------------
+;  Camera extrinsics:
+;    qCM  = rotation from IMU frame to camera frame (Hamilton quaternion)
+;    MrMC = vector from IMU origin to camera origin, in IMU frame [m]
+;
+;  Replace all values below with your actual calibration.
+;  Identity rotation + zero translation is a safe placeholder.
+; ----------------------------------------------------------------
+
+Camera0
+{
+    CalibrationFile ;               Absolute path to cam0 intrinsics YAML (visual)
+
+    qCM_x  0.0;
+    qCM_y  0.0;
+    qCM_z  0.0;
+    qCM_w  1.0;
+
+    MrMC_x  0.0;
+    MrMC_y  0.0;
+    MrMC_z  0.0;
+}
+
+Camera1
+{
+    CalibrationFile ;               Absolute path to cam1 intrinsics YAML (thermal)
+
+    qCM_x  0.0;
+    qCM_y  0.0;
+    qCM_z  0.0;
+    qCM_w  1.0;
+
+    MrMC_x  0.0;
+    MrMC_y  0.05;                       Adjust to your rig [m]
+    MrMC_z  0.0;
+}
+
+; ----------------------------------------------------------------
+;  Initial filter state and covariance
+; ----------------------------------------------------------------
+
+Init
+{
+    State
+    {
+        pos_0  0;           Initial position x [m]
+        pos_1  0;           Initial position y [m]
+        pos_2  0;           Initial position z [m]
+        vel_0  0;           Initial velocity x [m/s]
+        vel_1  0;           Initial velocity y [m/s]
+        vel_2  0;           Initial velocity z [m/s]
+        acb_0  0;           Initial accelerometer bias x [m/s^2]
+        acb_1  0;           Initial accelerometer bias y [m/s^2]
+        acb_2  0;           Initial accelerometer bias z [m/s^2]
+        gyb_0  0;           Initial gyroscope bias x [rad/s]
+        gyb_1  0;           Initial gyroscope bias y [rad/s]
+        gyb_2  0;           Initial gyroscope bias z [rad/s]
+        att_x  0;           Initial attitude x (IMU to world, Hamilton)
+        att_y  0;
+        att_z  0;
+        att_w  1;
+    }
+    Covariance
+    {
+        pos_0  0.0001;      Position uncertainty [m^2]
+        pos_1  0.0001;
+        pos_2  0.0001;
+        vel_0  1.0;         Velocity uncertainty [m^2/s^2] — large: unknown at start
+        vel_1  1.0;
+        vel_2  1.0;
+        acb_0  4e-4;        Accelerometer bias uncertainty [m^2/s^4]
+        acb_1  4e-4;
+        acb_2  4e-4;
+        gyb_0  3e-4;        Gyroscope bias uncertainty [rad^2/s^2]
+        gyb_1  3e-4;
+        gyb_2  3e-4;
+        att_0  0.1;         Attitude uncertainty [rad^2] (~±18 deg)
+        att_1  0.1;
+        att_2  0.1;
+        vep    0.0001;      Linear extrinsics uncertainty [m^2]
+        vea    0.01;        Rotational extrinsics uncertainty [rad^2]
+    }
+}
+
+; ----------------------------------------------------------------
+;  Image update — feature detection, tracking, and EKF update
+;
+;  ROVTIO extends ROVTIO with:
+;   - Per-camera UpdateNoiseN blocks (higher int noise for thermal)
+;   - Per-camera numbered suffix params (minAbsoluteSTScoreN, etc.)
+;   - Modality selection params for smart visual/thermal switching
+; ----------------------------------------------------------------
+
+ImgUpdate
+{
+    ; --- EKF solver ---
+    updateVecNormTermination  1.0e-4;   Convergence threshold
+    maxNumIteration           20;       Max IEKF iterations per update step
+
+    ; --- Tracking method ---
+    doPatchWarping    true;             Warp patches for rotation/perspective compensation
+    useDirectMethod   true;             true = photometric error (recommended)
+    startLevel        2;                Coarsest pyramid level to use
+    endLevel          1;                Finest pyramid level to use
+
+    ; --- Visualisation ---
+    doFrameVisualisation  true;
+    visualizePatches      true;
+
+    ; --- Per-camera update noise ---
+    ;     Visual cameras: lower int noise (~450). Thermal: higher int noise (~1000).
+    ;     pix ≈ (1/focal_length)^2 in rad^2. Increase for wider-angle/noisier cameras.
+
+    UpdateNoise0;                       Camera 0 — visual
+    {
+        pix  4;
+        int  450;
+    }
+    UpdateNoise1;                       Camera 1 — thermal
+    {
+        pix  5;
+        int  1000;
+    }
+
+    ; --- Feature initialisation ---
+    initCovFeature_0  0.5;
+    initCovFeature_1  1.0e-5;
+    initCovFeature_2  1.0e-5;
+    initDepth         0.5;
+
+    ; --- Feature detection (shared params) ---
+    nDetectionBuckets       100;
+    startDetectionTh        0.8;
+    scoreDetectionExponent  0.25;
+    penaltyDistance         75;
+    zeroDistancePenalty     100;
+
+    ; --- Per-camera: FAST corner threshold ---
+    ;     Thermal images often need a lower threshold (less sharp edges)
+    fastDetectionThreshold0  5;     Visual
+    fastDetectionThreshold1  3;     Thermal — lower: edges are softer
+
+    ; --- Per-camera: minimum absolute Shi-Tomasi score ---
+    ;     Thermal images have weaker gradients → lower threshold
+    minAbsoluteSTScore0  5.0;       Visual
+    minAbsoluteSTScore1  4.0;       Thermal
+
+    ; --- Per-camera: patch rejection threshold [intensity] ---
+    ;     Thermal images are noisier → allow higher error before rejection
+    patchRejectionTh0  50.0;        Visual
+    patchRejectionTh1  60.0;        Thermal
+
+    ; --- Feature quality & lifetime (shared) ---
+    minRelativeSTScore              0.75;
+    minTimeBetweenPatchUpdate       1.0;
+    statLocalQualityRange           10;
+    statLocalVisibilityRange        100;
+    statMinGlobalQualityRange       100;
+    trackingUpperBound              0.9;
+    trackingLowerBound              0.8;
+    minTrackedAndFreeFeatures       0.75;
+    removalFactor                   1.1;
+
+    ; --- Alignment ---
+    alignConvergencePixelRange              10;
+    alignCoverageRatio                      2;
+    alignMaxUniSample                       1;
+    alignmentHuberNormThreshold             10;
+    alignmentGaussianWeightingSigma         -1;     -1 = disabled
+    alignmentGradientExponent               0.0;
+    useIntensityOffsetForAlignment          true;
+    useIntensitySqewForAlignment            true;
+
+    ; --- Multi-camera ---
+    useCrossCameraMeasurements  false;  Disable during initial calibration phase
+    doStereoInitialization      false;
+    noiseGainForOffCamera       1.0;    Noise multiplier for non-primary cameras
+
+    ; --- Outlier rejection ---
+    MahalanobisTh                                       9.21;
+    removeNegativeFeatureAfterUpdate                    true;
+    maxUncertaintyToDepthRatioForDepthInitialization    0.3;
+    maxAllowedFeatureDistance                           25.0;
+    discriminativeSamplingDistance                      0.02;
+    discriminativeSamplingGain                          1.1;
+
+    ; ----------------------------------------------------------------
+    ;  ROVTIO modality selection — smart visual/thermal switching
+    ;
+    ;  minSTScoreForModalitySelection:
+    ;    The minimum Shi-Tomasi score used to COUNT usable features
+    ;    when deciding which modality is currently better.
+    ;    Visual cameras: low threshold (40) — most edges qualify.
+    ;    Thermal cameras: high threshold (220) — only strong thermal
+    ;    gradients count, preventing a degraded thermal stream from
+    ;    being selected when it has few real features.
+    ;
+    ;  additionalScoreFromOtherModality:
+    ;    Score bonus added to a feature when a feature from the other
+    ;    modality is nearby. Encourages the filter to track features
+    ;    that are visible in multiple modalities simultaneously.
+    ; ----------------------------------------------------------------
+
+    minSTScoreForModalitySelection0  40;        Visual cam 0 — low threshold
+    minSTScoreForModalitySelection1  220;       Thermal cam 1 — high threshold
+
+    additionalScoreFromOtherModality0  50.0;    Bonus for visual features near a thermal one
+    additionalScoreFromOtherModality1  70.0;    Bonus for thermal features near a visual one
+
+    maxDistanceForApproximatlyLocalizingFeatures  -10;  Pixel distance for cross-modality
+                                                        association (-10 = never add bonus)
+    modalitySelectionAdditionScalar               1.0;  Multiplier on allowed features per modality
+    relativeThresholdforUsingLiveFeatureScores    0.5;
+    minFeaturesPerModality                        0;    Min features kept per modality even if
+                                                        it is considered suboptimal
+
+    ; --- Motion detection ---
+    MotionDetection
+    {
+        isEnabled                           1;      Required for ZeroVelocityUpdate
+        rateOfMovingFeaturesTh              0.5;
+        pixelCoordinateMotionTh             1.0;
+        minFeatureCountForNoMotionDetection 1;
+    }
+
+    ; --- Zero-velocity update ---
+    ZeroVelocityUpdate
+    {
+        UpdateNoise
+        {
+            vel_0  0.01;
+            vel_1  0.01;
+            vel_2  0.01;
+        }
+        MahalanobisTh0   7.689997599999999;
+        minNoMotionTime  0.5;               Seconds stationary before triggering [s]
+        isEnabled        1;
+    }
+}
+
+; ----------------------------------------------------------------
+;  IMU prediction noise
+;  Tune vel/att to your IMU datasheet noise spectral density.
+;  The values here suit a mid-grade MEMS IMU (e.g. BMI088).
+; ----------------------------------------------------------------
+
+Prediction
+{
+    PredictionNoise
+    {
+        pos_0  1.0e-4;      Position [m^2/s]
+        pos_1  1.0e-4;
+        pos_2  1.0e-4;
+        vel_0  4.0e-5;      Velocity / accelerometer noise [m^2/s^3]
+        vel_1  4.0e-5;
+        vel_2  4.0e-5;
+        acb_0  1.0e-8;      Accelerometer bias random walk [m^2/s^5]
+        acb_1  1.0e-8;
+        acb_2  1.0e-8;
+        gyb_0  3.8e-9;      Gyroscope bias random walk [rad^2/s^3]
+        gyb_1  3.8e-9;
+        gyb_2  3.8e-9;
+        att_0  7.6e-8;      Attitude / gyroscope noise [rad^2/s]
+        att_1  7.6e-8;
+        att_2  7.6e-8;
+        vep    1.0e-8;      Linear extrinsics drift [m^2/s]    — keep small
+        vea    1.0e-8;      Rotational extrinsics drift [rad^2/s] — keep small
+        dep    0.0001;      Feature depth [m^2/s]
+        nor    0.00001;     Feature bearing vector [rad^2/s]
+    }
+    GravityVector
+    {
+        g_x  0.0;           Gravity vector x [m/s^2]
+        g_y  0.0;           Gravity vector y [m/s^2]
+        g_z  -9.81;         Gravity vector z [m/s^2] — use -10.0854 for standard gravity
+    }
+    MotionDetection
+    {
+        inertialMotionRorTh  0.1;   Rotational rate threshold [rad/s]
+        inertialMotionAccTh  0.5;   Acceleration threshold [m/s^2]
+    }
+}
+
+; ----------------------------------------------------------------
+;  External pose update (disabled by default)
+;  Configure if feeding /pose or /odometry
+; ----------------------------------------------------------------
+
+PoseUpdate
+{
+    UpdateNoise
+    {
+        pos_0  0.0013;
+        pos_1  0.0013;
+        pos_2  0.0013;
+        att_0  5.398e-05;
+        att_1  5.398e-05;
+        att_2  5.398e-05;
+    }
+    init_cov_IrIW   1;
+    init_cov_qWI    1;
+    init_cov_MrMV   1;
+    init_cov_qVM    1;
+    pre_cov_IrIW    1.0e-4;
+    pre_cov_qWI     1.0e-4;
+    pre_cov_MrMV    1.0e-4;
+    pre_cov_qVM     1.0e-4;
+    MahalanobisTh0  12.6511204;
+    noFeedbackToRovtio           true;   Set false to feed corrections into filter state
+    enablePosition              true;
+    enableAttitude              true;
+    doInertialAlignmentAtStart  true;
+    doVisualization             false;
+    useOdometryCov              false;
+    timeOffset                  0.0;
+    qVM_x  0;   
+    qVM_y  0;   
+    qVM_z  0;   
+    qVM_w  1;
+    MrMV_x 0;   
+    MrMV_y 0;   
+    MrMV_z 0;
+    qWI_x  0;   
+    qWI_y  0;   
+    qWI_z  0;   
+    qWI_w  1;
+    IrIW_x 0;   
+    IrIW_y 0;   
+    IrIW_z 0;
+}
+
+; ----------------------------------------------------------------
+;  External velocity update (disabled by default)
+;  Configure if feeding /abss/twist
+; ----------------------------------------------------------------
+
+VelocityUpdate
+{
+    UpdateNoise
+    {
+        vel_0  0.0001;
+        vel_1  0.0001;
+        vel_2  0.0001;
+    }
+    MahalanobisTh0  7.689997599999999;
+    qAM_x  0;   
+    qAM_y  0;
+    qAM_z  0;   
+    qAM_w  1;
+}
