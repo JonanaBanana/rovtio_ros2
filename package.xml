@@ -10,7 +10,7 @@
   <url></url>
   <author>bloeschm</author>
   <author>Henrik D. Flemmen</author>
-  <maintainer email="henrikdf@stud.ntnu.no">Henrik D. Flemmen</maintainer>
+  <maintainer email="202004778@post.au.dk">Jonathan Nielsen</maintainer>
   <license>BSD License</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
